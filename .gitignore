@@ -1,0 +1,23 @@
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+env/
+venv/
+*.env
+.idea/  # For PyCharm/IntelliJ IDE
+.vscode/ # For VS Code IDE (if you don't want to share workspace settings)
+
+# IDE and OS generated files
+.DS_Store # macOS
+Thumbs.db # Windows
+*.swp     # vim swap files
+*~        # backup files
+
+# Docker specific
+.dockerignore # Don't commit the gitignore itself if it's already in gitignore. It's usually not.
+
+# Cloud build specific
+*.tgz # Temporary tarball created by gcloud builds submit
