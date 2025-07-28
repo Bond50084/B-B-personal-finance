@@ -1,170 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Simulation Results</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* General Body Styling for High Contrast */
+      /* General Body Styling for High Contrast */
+      body {
+        font-family: "Arial", sans-serif; /* Changed to Arial */
+        margin: 0;
+        padding: 20px; /* Existing general padding */
+        padding-top: 100px; /* Added to account for the 80px fixed top bar + original 20px top padding */
+        background-color: #000; /* Black background */
+        color: #fff; /* White text */
+        line-height: 1.6;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center content horizontally */
+      }
+
+      /* Top Bar Styling - Copied from index.html */
+      /* Top Bar Styling */
+      .top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        background-color: #000; /* Black background */
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start; /* Added/Ensured this line */
+        padding: 0 20px; /* This padding will keep a 20px gap from the very left edge */
+        box-sizing: border-box;
+        border: 1px solid #fff; /* White border */
+        box-shadow: 0 10px 20px 0px rgba(0, 0, 0, 0.7);
+      }
+
+      .top-bar .logo-small {
+        height: 60px;
+        width: auto;
+        filter: invert(100%); /* Invert logo for black background */
+      }
+
+      .top-bar .firm-name {
+        font-family: "Arial", sans-serif; /* Set to Arial */
+        font-size: 1.8em;
+        font-weight: 700;
+        color: #fff; /* White for black background */
+        margin-left: 15px;
+        white-space: nowrap;
+      }
+
+      /* Headings - Font family updated for consistency */
+      h1 {
+        font-family: "Arial", sans-serif; /* Changed to Arial */
+        color: #fff; /* White headings */
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 2.5em;
+        font-weight: 700;
+      }
+
+      h2 {
+        font-family: "Arial", sans-serif; /* Changed to Arial */
+        color: #fff; /* White headings */
+        border-bottom: 2px solid #fff; /* White underline */
+        padding-bottom: 5px;
+        margin-top: 30px;
+        margin-bottom: 20px;
+        font-size: 1.8em;
+        text-align: center; /* Center h2 within its container */
+      }
+
+      /* Paragraphs */
+      p {
+        color: #fff; /* White text for paragraphs */
+        font-size: 1.1em;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+
+      /* New: Summary Container Styling */
+      .summary-container {
+        background-color: #000; /* Black background */
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #fff; /* White border */
+        margin-bottom: 30px;
+        max-width: 900px; /* Limit width to match other content */
+        width: 100%; /* Ensure it takes full width up to max-width */
+        box-sizing: border-box; /* Include padding and border in total width */
+        text-align: center; /* Center the text inside */
+      }
+
+      .summary-container p {
+        font-size: 1.2em; /* Slightly larger text for summary */
+        margin-bottom: 10px;
+      }
+
+      .summary-container p:last-child {
+        margin-bottom: 0; /* No bottom margin for the last paragraph */
+      }
+
+      /* Plot Container Styling */
+      .plot-container {
+        background-color: #000; /* Black background for plot containers */
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #fff; /* White border for high contrast */
+        margin-bottom: 30px;
+        max-width: 900px; /* Limit width to match form */
+        width: 100%; /* Ensure it takes full width up to max-width */
+        box-sizing: border-box; /* Include padding and border in the element's total width */
+      }
+
+      /* Image Styling */
+      img {
+        max-width: 100%;
+        height: auto;
+        display: block; /* Remove extra space below image */
+        margin: 0 auto; /* Center images */
+        border-radius: 5px; /* Slightly rounded corners for images */
+        border: 1px solid #fff; /* White border for images */
+      }
+
+      /* Link Styling */
+      a {
+        display: block;
+        width: 250px; /* Increased width for the link button */
+        padding: 12px 25px;
+        margin: 30px auto 20px; /* Center link and add margins */
+        background-color: #fff; /* White button */
+        color: #000; /* Black text on button */
+        border: 1px solid #fff; /* White border */
+        border-radius: 5px;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none; /* Remove underline from link */
+      }
+
+      a:hover {
+        background-color: #333; /* Dark grey on hover */
+        color: #fff; /* White text on hover */
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
         body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #000; /* Black background */
-            color: #fff; /* White text */
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Center content horizontally */
+          padding: 10px;
+          padding-top: 90px; /* Adjust for smaller screens if needed, otherwise keep 100px */
         }
-
-        /* Headings */
         h1 {
-            font-family: 'Inter', sans-serif;
-            color: #fff; /* White headings */
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            font-weight: 700;
+          font-size: 2em;
         }
-
         h2 {
-            font-family: 'Inter', sans-serif;
-            color: #fff; /* White headings */
-            border-bottom: 2px solid #fff; /* White underline */
-            padding-bottom: 5px;
-            margin-top: 30px;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-            text-align: center; /* Center h2 within its container */
+          font-size: 1.5em;
         }
-
-        /* Paragraphs */
-        p {
-            color: #fff; /* White text for paragraphs */
-            font-size: 1.1em;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        /* Plot Container Styling */
         .plot-container {
-            background-color: #000; /* Black background for plot containers */
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #fff; /* White border for high contrast */
-            margin-bottom: 30px;
-            max-width: 900px; /* Limit width to match form */
-            width: 100%; /* Ensure it takes full width up to max-width */
-            box-sizing: border-box; /* Include padding and border in the element's total width */
+          padding: 15px;
         }
-
-        /* Image Styling */
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block; /* Remove extra space below image */
-            margin: 0 auto; /* Center images */
-            border-radius: 5px; /* Slightly rounded corners for images */
-            border: 1px solid #fff; /* White border for images */
-        }
-
-        /* Link Styling */
         a {
-            display: block;
-            width: 250px; /* Increased width for the link button */
-            padding: 12px 25px;
-            margin: 30px auto 20px; /* Center link and add margins */
-            background-color: #fff; /* White button */
-            color: #000; /* Black text on button */
-            border: 1px solid #fff; /* White border */
-            border-radius: 5px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            font-weight: 600;
-            text-align: center;
-            text-decoration: none; /* Remove underline from link */
+          width: 100%;
+          max-width: 250px; /* Keep max-width for smaller screens */
         }
-
-        a:hover {
-            background-color: #333; /* Dark grey on hover */
-            color: #fff; /* White text on hover */
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            h1 {
-                font-size: 2em;
-            }
-            h2 {
-                font-size: 1.5em;
-            }
-            .plot-container {
-                padding: 15px;
-            }
-            a {
-                width: 100%;
-                max-width: 250px; /* Keep max-width for smaller screens */
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <div class="top-bar">
+      <img
+        src="static/logo.png"
+        alt="Behrens & Behrens Capital Management Logo"
+        class="logo-small"
+      />
+      <span class="firm-name">Behrens & Behrens Capital Management</span>
+    </div>
+
     <h1>Simulation Results</h1>
-    <p>Final Total Wealth (Median): {{ final_wealth }}</p>
 
-    <div class="plot-container">
-        <h2>Key Financial Trajectories</h2>
-        <img src="data:image/png;base64,{{ plots.plot1 }}" alt="Median Total Wealth and Percentiles">
-    </div>
-
-    <div class="plot-container">
-        <h2>Monthly Cash Flow Components</h2>
-        <img src="data:image/png;base64,{{ plots.plot2 }}" alt="Monthly Income, Expenses, and Net Cash">
-    </div>
-
-    <div class="plot-container">
-        <h2>Probability of Cash Shortfall</h2>
-        <img src="data:image/png;base64,{{ plots.plot3 }}" alt="Probability of Cash Below Threshold and Zero">
+    <div class="summary-container">
+      <h2>Simulation Summary</h2>
+      <p>
+        Your projected median wealth at the end of the simulation is:
+        <strong>{{ final_wealth }}</strong>.
+      </p>
+      <p>
+        The estimated after-tax value of your final wealth is:
+        <strong>{{ final_wealth_after_tax | default("N/A") }}</strong>.
+      </p>
     </div>
 
     <div class="plot-container">
-        <h2>Cumulative Cash Flow Analysis</h2>
-        <img src="data:image/png;base64,{{ plots.plot4 }}" alt="Cumulative Income, Expenses, and Net Cash Flow">
-    </div>
-    <!--
-    <div class="plot-container">
-        <h2>Probability of Cash Account Reaching Critical Levels Over Time</h2>
-        <img src="data:image/png;base64,{{ plots.plot5 }}" alt="Cumulative Income by Source (Carmen, Felix)">
-    </div>
-    -->
-    <div class="plot-container">
-        <h2>
-            Median Total Wealth Breakdown: Cash vs. Portfolio
-        </h2>
-        <img src="data:image/png;base64,{{ plots.plot6 }}" alt="Median Total Wealth Breakdown: Cash vs. Portfolio">
+      <h2>Key Financial Trajectories</h2>
+      <img
+        src="data:image/png;base64,{{ plots.plot1 }}"
+        alt="Median Total Wealth and Percentiles"
+      />
     </div>
 
     <div class="plot-container">
-        <h2>
-            Annual Net Cash Flow (€)
-        </h2>
-        <img src="data:image/png;base64,{{ plots.plot7 }}" alt="Annual Net Cash Flow (€)">
+      <h2>Monthly Cash Flow Components</h2>
+      <img
+        src="data:image/png;base64,{{ plots.plot2 }}"
+        alt="Monthly Income, Expenses, and Net Cash"
+      />
     </div>
 
     <div class="plot-container">
-        <h2>
-            Cumulative Impact of Large Financial Events
-        </h2>
-        <img src="data:image/png;base64,{{ plots.plot8 }}" alt="Cumulative Impact of Large Financial Events">
+      <h2>Probability of Cash Shortfall</h2>
+      <img
+        src="data:image/png;base64,{{ plots.plot3 }}"
+        alt="Probability of Cash Below Threshold and Zero"
+      />
+    </div>
+
+    <div class="plot-container">
+      <h2>Cumulative Cash Flow Analysis</h2>
+      <img
+        src="data:image/png;base64,{{ plots.plot4 }}"
+        alt="Cumulative Income, Expenses, and Net Cash Flow"
+      />
+    </div>
+    <div class="plot-container">
+      <h2>Median Total Wealth Breakdown: Cash vs. Portfolio</h2>
+      <img
+        src="data:image/png;base64,{{ plots.plot6 }}"
+        alt="Median Total Wealth Breakdown: Cash vs. Portfolio"
+      />
+    </div>
+
+    <div class="plot-container">
+      <h2>Annual Net Cash Flow (€)</h2>
+      <img
+        src="data:image/png;base64,{{ plots.plot7 }}"
+        alt="Annual Net Cash Flow (€)"
+      />
+    </div>
+
+    <div class="plot-container">
+      <h2>Cumulative Impact of Large Financial Events</h2>
+      <img
+        src="data:image/png;base64,{{ plots.plot8 }}"
+        alt="Cumulative Impact of Large Financial Events"
+      />
     </div>
 
     <a href="/" class="rounded-md">Run another simulation</a>
-</body>
+  </body>
 </html>

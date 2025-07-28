@@ -115,7 +115,7 @@ def run_simulation(start_date_str, end_date_str, initial_cash, invest_frac, thre
         initial_port    = initial_cash * invest_frac
         initial_cash_ac = initial_cash * (1 - invest_frac)
 
-        n_sims = 100
+        n_sims = 200
         cash_paths  = np.zeros((n_sims, months+1))
         port_paths  = np.zeros((n_sims, months+1))
         total_paths = np.zeros((n_sims, months+1))

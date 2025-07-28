@@ -12,12 +12,47 @@
     <style>
       /* Custom styles for high contrast black and white theme */
       body {
-        font-family: "Inter", sans-serif;
+        font-family: "Arial", sans-serif;
         margin: 0;
         padding: 0;
         background-color: #000; /* Black background */
         color: #fff; /* White text */
         line-height: 1.6;
+      }
+      /* Top Bar Styling */
+      .top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        background-color: #000; /* Changed to black */
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        box-sizing: border-box;
+        border: 1px solid #fff; /* Added white border */
+        /* New shadow: X-offset, Y-offset, Blur-radius, Spread-radius, Color */
+        /* This creates a soft, blurred shadow that emanates from the bar */
+        box-shadow: 0 10px 40px 0px rgba(0, 0, 0, 0.7);
+      }
+
+      .top-bar .logo-small {
+        height: 60px;
+        width: auto;
+        filter: invert(
+          100%
+        ); /* Invert logo colors to white for black background */
+      }
+
+      .top-bar .firm-name {
+        font-family: "Roboto", sans-serif;
+        font-size: 1.8em;
+        font-weight: 700;
+        color: #fff; /* Changed text color to white for black background */
+        margin-left: 15px;
+        white-space: nowrap;
       }
 
       /* Hero Image Section */
@@ -32,8 +67,11 @@
         justify-content: center;
         color: #fff;
         text-align: center;
-        position: relative;
+        position: fixed; /* Changed from relative to fixed */
+        top: 80px;
+        left: 0;
         overflow: hidden; /* Ensures image doesn't overflow */
+        z-index: -1; /* Ensures content scrolls over it */
       }
       /* Blurry edge effect for hero image */
       .hero-section::after {
@@ -56,7 +94,7 @@
       }
 
       .hero-overlay {
-        position: absolute;
+        position: absolute; /* Keep as absolute relative to its parent .hero-section */
         top: 0;
         left: 0;
         width: 100%;
@@ -67,6 +105,7 @@
         justify-content: center;
         align-items: center;
         padding: 20px;
+        z-index: 0; /* Ensure it's above the image, but below scrolling content */
       }
 
       .hero-title {
@@ -83,15 +122,128 @@
         max-width: 800px;
         text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
       }
+      /* NEW: Scrolling Content Wrapper */
+      .scrolling-content-wrapper {
+        position: relative;
+        z-index: 1;
+        margin-top: calc(
+          100vh + 80px
+        ); /* Adjusted: (Hero height + New Top Bar height) */
+        background-color: transparent; /* Changed to transparent to see background */
+        width: 60%; /* Make it narrower */
+        margin-left: auto; /* Center it */
+        margin-right: auto; /* Center it */
+        padding: 20px 0; /* Add some vertical padding */
+      }
 
       /* Content Section */
       .content-section {
         padding: 40px 20px;
-        max-width: 900px;
-        margin: 0 auto;
+        max-width: 900px; /* Keep max-width for internal content if needed */
+        margin: 0 auto; /* Center content within the wrapper */
         background-color: #000; /* Black background for content */
         border-radius: 8px;
         box-shadow: 0 0 0 rgba(0, 0, 0, 0); /* No shadow for high contrast */
+        border: 1px solid #fff; /* Add a border to the content section itself */
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0; /* Start completely transparent */
+          transform: translateY(40px); /* Start 20px below its final position */
+        }
+        to {
+          opacity: 1; /* End fully opaque */
+          transform: translateY(0); /* End at its original position */
+        }
+      }
+
+      /* Apply the animation to the explanation text */
+      .explanation-text {
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 30px;
+        color: #ccc;
+        font-size: 1.3em; /* Increased font size */
+        line-height: 1.5;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+
+        /* Animation properties */
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 1s ease-out 0.5s forwards;
+      }
+      .top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        background-color: #000; /* Changed to black */
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        box-sizing: border-box;
+        border: 1px solid #fff; /* Added white border */
+        /* New shadow: X-offset, Y-offset, Blur-radius, Spread-radius, Color */
+        /* This creates a soft, blurred shadow that emanates from the bar */
+        box-shadow: 0 10px 20px 0px rgba(0, 0, 0, 0.7);
+      }
+
+      .top-bar .logo-small {
+        height: 60px;
+        width: auto;
+        filter: invert(
+          100%
+        ); /* Invert logo colors to white for black background */
+      }
+
+      .top-bar .firm-name {
+        font-family: "Arial", sans-serif;
+        font-size: 1.8em;
+        font-weight: 700;
+        color: #fff; /* Changed text color to white for black background */
+        margin-left: 15px;
+        white-space: nowrap;
+      }
+
+      /* Keyframes for the pop-up animation - ensure this is also in your CSS */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Corrected .explanation-text CSS rule */
+      .explanation-text {
+        /* <-- This selector and opening brace were missing/misplaced */
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 30px;
+        color: #ccc;
+        font-size: 1.3em; /* Existing font size */
+        line-height: 1.5;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+
+        /* Animation properties */
+        opacity: 0; /* Initially hide the text */
+        transform: translateY(
+          20px
+        ); /* Set initial position for slide-up effect */
+        animation: fadeInUp 3s ease-out 0.5s forwards; /* Animation name, duration, timing function, delay, and fill mode */
+      }
+
+      .explanation-text p {
+        margin-bottom: 10px;
       }
 
       .header {
@@ -102,15 +254,18 @@
       }
 
       .logo {
-        max-width: 200px;
+        max-width: 400px;
         height: auto;
         margin-bottom: 15px;
-        filter: invert(100%); /* Invert logo colors for black and white theme */
+        /*filter: invert(100%);  Invert logo colors for black and white theme */
+        display: block; /* Added to allow margin: auto to work */
+        margin-left: auto; /* Centers the image */
+        margin-right: auto; /* Centers the image */
       }
 
       h1,
       h2 {
-        font-family: "Inter", sans-serif;
+        font-family: "Arial", sans-serif;
         color: #fff; /* White headings */
         text-align: center;
         margin-bottom: 20px;
@@ -235,11 +390,23 @@
           margin-left: 0;
           margin-top: 5px;
         }
+        .scrolling-content-wrapper {
+          width: 90%; /* Adjust width for smaller screens */
+        }
       }
     </style>
   </head>
   <body>
-    <!-- Hero Section -->
+    <div class="top-bar">
+      <img
+        src="static/logo.png"
+        alt="B & B Capital Management Logo"
+        class="logo-small"
+      />
+      <span class="firm-name"
+        >B & B Capital Management - Personal Financial Simulator</span
+      >
+    </div>
     <div class="hero-section">
       <div class="hero-overlay">
         <h1 class="hero-title">Financial Freedom Awaits</h1>
@@ -251,339 +418,346 @@
       </div>
     </div>
 
-    <!-- Main Content Section -->
-    <div class="content-section">
-      <div class="header">
-        <!-- Using your actual logo from the 'static' folder. -->
-        <img
-          src="static/logo.png"
-          alt="Behrens & Behrens Capital Management Logo"
-          class="logo"
-        />
-        <h1>Financial Simulation Parameters</h1>
+    <div class="scrolling-content-wrapper">
+      <div class="content-section">
+        <div class="header">
+          <div class="explanation-text">
+            <p><strong>Welcome to your financial simulator!</strong></p>
+            <p>
+              This calculator allows you to plan your future financial journey
+              by simulating various scenarios. Input your income streams,
+              expenses, and investment strategies to visualize your financial
+              growth over time and ensure you meet your goals.
+            </p>
+          </div>
+          <h1>Financial Simulation Parameters</h1>
+        </div>
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form action="/run" method="post">
+          <h2>General Simulation Settings</h2>
+          <div class="form-group">
+            <label for="start_date">Start Date:</label>
+            <input
+              type="date"
+              id="start_date"
+              name="start_date"
+              value="2025-01-31"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >The beginning date for your financial simulation.</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="end_date">End Date:</label>
+            <input
+              type="date"
+              id="end_date"
+              name="end_date"
+              value="2060-12-31"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >The end date for your financial simulation.</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="initial_cash">Initial Cash (€):</label>
+            <input
+              type="text"
+              id="initial_cash"
+              name="initial_cash"
+              value="400000"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >Your total cash at the start. It will be split between cash and
+              portfolio.</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="invest_frac">Investment Fraction (0.0-1.0):</label>
+            <input
+              type="text"
+              id="invest_frac"
+              name="invest_frac"
+              value="0.8"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >The portion of initial cash to invest (e.g., 0.8 = 80%).</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="threshold_cash">Cash Threshold (€):</label>
+            <input
+              type="text"
+              id="threshold_cash"
+              name="threshold_cash"
+              value="100000"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >Minimum cash balance. Portfolio funds top-up if cash falls
+              below.</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="market_index">Select Market Index:</label>
+            <select id="market_index" name="market_index" class="rounded-md">
+              <option value="S&P 500" selected>S&P 500</option>
+              <option value="Euro Stoxx 50">Euro Stoxx 50</option>
+            </select>
+            <span class="explanation"
+              >Market index for portfolio simulations.</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="inflation_rate"
+              >Annual Inflation Rate (e.g., 0.02 for 2%):</label
+            >
+            <input
+              type="text"
+              id="inflation_rate"
+              name="inflation_rate"
+              value="0.021"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >The annual inflation rate to apply to income and expenses.</span
+            >
+          </div>
+
+          <h2>Income Streams</h2>
+          <div class="form-group">
+            <label for="carmen_job_val"
+              >First Person Job Income (€/month):</label
+            >
+            <input
+              type="text"
+              id="carmen_job_val"
+              name="carmen_job_val"
+              value="4000"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >First person's gross monthly income from their job.</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="carmen_job_start">First Person Job Start Date:</label>
+            <input
+              type="date"
+              id="carmen_job_start"
+              name="carmen_job_start"
+              value="2026-01-31"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >The date first person's job income begins.</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="carmen_job_end">First Person Job End Date:</label>
+            <input
+              type="date"
+              id="carmen_job_end"
+              name="carmen_job_end"
+              value="2031-01-31"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >The date first person's job income ends.</span
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="carmen_rente_val"
+              >First Person Pension Income (€/month):</label
+            >
+            <input
+              type="text"
+              id="carmen_rente_val"
+              name="carmen_rente_val"
+              value="3000"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >First person's gross monthly pension income.</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="carmen_rente_start"
+              >First Person Pension Start Date:</label
+            >
+            <input
+              type="date"
+              id="carmen_rente_start"
+              name="carmen_rente_start"
+              value="2032-01-31"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >The date first person's pension income begins.</span
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="felix_job_val"
+              >Second Person Job Income (€/month):</label
+            >
+            <input
+              type="text"
+              id="felix_job_val"
+              name="felix_job_val"
+              value="4000"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >Second person's gross monthly income from their job.</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="felix_job_start">Second Person Job Start Date:</label>
+            <input
+              type="date"
+              id="felix_job_start"
+              name="felix_job_start"
+              value="2028-01-31"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >The date second person's job income begins.</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="felix_job_end">Second Person Job End Date:</label>
+            <input
+              type="date"
+              id="felix_job_end"
+              name="felix_job_end"
+              value="2033-01-31"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >The date second person's job income ends.</span
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="felix_rente_val"
+              >Second Person Pension Income (€/month):</label
+            >
+            <input
+              type="text"
+              id="felix_rente_val"
+              name="felix_rente_val"
+              value="3400"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >Second person's gross monthly pension income.</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="felix_rente_start"
+              >Second Person Pension Start Date:</label
+            >
+            <input
+              type="date"
+              id="felix_rente_start"
+              name="felix_rente_start"
+              value="2031-01-31"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >The date second person's pension income begins.</span
+            >
+          </div>
+
+          <h2>Large Payments/Withdrawals</h2>
+          <div class="form-group">
+            <label for="large_payment1_val"
+              >Large Payment/Withdrawal 1 (€):</label
+            >
+            <input
+              type="text"
+              id="large_payment1_val"
+              name="large_payment1_val"
+              value="-1"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >A significant one-time income (+ve) or expense (-ve).</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="large_payment1_date">Date of Payment 1:</label>
+            <input
+              type="date"
+              id="large_payment1_date"
+              name="large_payment1_date"
+              value="2027-01-31"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >The date this large payment/withdrawal occurs.</span
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="large_payment2_val"
+              >Large Payment/Withdrawal 2 (€):</label
+            >
+            <input
+              type="text"
+              id="large_payment2_val"
+              name="large_payment2_val"
+              value="1"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >Another significant one-time income (+ve) or expense (-ve).</span
+            >
+          </div>
+          <div class="form-group">
+            <label for="large_payment2_date">Date of Payment 2:</label>
+            <input
+              type="date"
+              id="large_payment2_date"
+              name="large_payment2_date"
+              value="2033-01-31"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >The date this second large payment/withdrawal occurs.</span
+            >
+          </div>
+
+          <h2>Other Expenses</h2>
+          <div class="form-group">
+            <label for="other_monthly_expenses"
+              >Other Monthly Expenses (€/month):</label
+            >
+            <input
+              type="text"
+              id="other_monthly_expenses"
+              name="other_monthly_expenses"
+              value="0"
+              class="rounded-md"
+            />
+            <span class="explanation"
+              >Any additional monthly expenses not fixed (e.g., variable
+              leisure).</span
+            >
+          </div>
+
+          <button type="submit" class="rounded-md">Run Simulation</button>
+        </form>
       </div>
-
-      {% if error %}
-      <p class="error">{{ error }}</p>
-      {% endif %}
-
-      <form action="/run" method="post">
-        <h2>General Simulation Settings</h2>
-        <div class="form-group">
-          <label for="start_date">Start Date:</label>
-          <input
-            type="date"
-            id="start_date"
-            name="start_date"
-            value="2025-01-31"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >The beginning date for your financial simulation.</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="end_date">End Date:</label>
-          <input
-            type="date"
-            id="end_date"
-            name="end_date"
-            value="2060-12-31"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >The end date for your financial simulation.</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="initial_cash">Initial Cash (€):</label>
-          <input
-            type="text"
-            id="initial_cash"
-            name="initial_cash"
-            value="400000"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >Your total cash at the start. It will be split between cash and
-            portfolio.</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="invest_frac">Investment Fraction (0.0-1.0):</label>
-          <input
-            type="text"
-            id="invest_frac"
-            name="invest_frac"
-            value="0.8"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >The portion of initial cash to invest (e.g., 0.8 = 80%).</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="threshold_cash">Cash Threshold (€):</label>
-          <input
-            type="text"
-            id="threshold_cash"
-            name="threshold_cash"
-            value="100000"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >Minimum cash balance. Portfolio funds top-up if cash falls
-            below.</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="market_index">Select Market Index:</label>
-          <select id="market_index" name="market_index" class="rounded-md">
-            <option value="S&P 500" selected>S&P 500</option>
-            <option value="Euro Stoxx 50">Euro Stoxx 50</option>
-          </select>
-          <span class="explanation"
-            >Market index for portfolio simulations.</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="inflation_rate"
-            >Annual Inflation Rate (e.g., 0.02 for 2%):</label
-          >
-          <input
-            type="text"
-            id="inflation_rate"
-            name="inflation_rate"
-            value="0.021"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >The annual inflation rate to apply to income and expenses.</span
-          >
-        </div>
-
-        <h2>Income Streams</h2>
-        <div class="form-group">
-          <label for="carmen_job_val">First Person Job Income (€/month):</label>
-          <input
-            type="text"
-            id="carmen_job_val"
-            name="carmen_job_val"
-            value="4000"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >First person's gross monthly income from their job.</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="carmen_job_start">First Person Job Start Date:</label>
-          <input
-            type="date"
-            id="carmen_job_start"
-            name="carmen_job_start"
-            value="2026-01-31"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >The date first person's job income begins.</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="carmen_job_end">First Person Job End Date:</label>
-          <input
-            type="date"
-            id="carmen_job_end"
-            name="carmen_job_end"
-            value="2031-01-31"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >The date first person's job income ends.</span
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="carmen_rente_val"
-            >First Person Pension Income (€/month):</label
-          >
-          <input
-            type="text"
-            id="carmen_rente_val"
-            name="carmen_rente_val"
-            value="3000"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >First person's gross monthly pension income.</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="carmen_rente_start"
-            >First Person Pension Start Date:</label
-          >
-          <input
-            type="date"
-            id="carmen_rente_start"
-            name="carmen_rente_start"
-            value="2032-01-31"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >The date first person's pension income begins.</span
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="felix_job_val">Second Person Job Income (€/month):</label>
-          <input
-            type="text"
-            id="felix_job_val"
-            name="felix_job_val"
-            value="4000"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >Second person's gross monthly income from their job.</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="felix_job_start">Second Person Job Start Date:</label>
-          <input
-            type="date"
-            id="felix_job_start"
-            name="felix_job_start"
-            value="2028-01-31"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >The date second person's job income begins.</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="felix_job_end">Second Person Job End Date:</label>
-          <input
-            type="date"
-            id="felix_job_end"
-            name="felix_job_end"
-            value="2033-01-31"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >The date second person's job income ends.</span
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="felix_rente_val"
-            >Second Person Pension Income (€/month):</label
-          >
-          <input
-            type="text"
-            id="felix_rente_val"
-            name="felix_rente_val"
-            value="3400"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >Second person's gross monthly pension income.</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="felix_rente_start"
-            >Second Person Pension Start Date:</label
-          >
-          <input
-            type="date"
-            id="felix_rente_start"
-            name="felix_rente_start"
-            value="2031-01-31"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >The date second person's pension income begins.</span
-          >
-        </div>
-
-        <h2>Large Payments/Withdrawals</h2>
-        <div class="form-group">
-          <label for="large_payment1_val"
-            >Large Payment/Withdrawal 1 (€):</label
-          >
-          <input
-            type="text"
-            id="large_payment1_val"
-            name="large_payment1_val"
-            value="-1"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >A significant one-time income (+ve) or expense (-ve).</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="large_payment1_date">Date of Payment 1:</label>
-          <input
-            type="date"
-            id="large_payment1_date"
-            name="large_payment1_date"
-            value="2027-01-31"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >The date this large payment/withdrawal occurs.</span
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="large_payment2_val"
-            >Large Payment/Withdrawal 2 (€):</label
-          >
-          <input
-            type="text"
-            id="large_payment2_val"
-            name="large_payment2_val"
-            value="1"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >Another significant one-time income (+ve) or expense (-ve).</span
-          >
-        </div>
-        <div class="form-group">
-          <label for="large_payment2_date">Date of Payment 2:</label>
-          <input
-            type="date"
-            id="large_payment2_date"
-            name="large_payment2_date"
-            value="2033-01-31"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >The date this second large payment/withdrawal occurs.</span
-          >
-        </div>
-
-        <h2>Other Expenses</h2>
-        <div class="form-group">
-          <label for="other_monthly_expenses"
-            >Other Monthly Expenses (€/month):</label
-          >
-          <input
-            type="text"
-            id="other_monthly_expenses"
-            name="other_monthly_expenses"
-            value="0"
-            class="rounded-md"
-          />
-          <span class="explanation"
-            >Any additional monthly expenses not fixed (e.g., variable
-            leisure).</span
-          >
-        </div>
-
-        <button type="submit" class="rounded-md">Run Simulation</button>
-      </form>
     </div>
   </body>
 </html>

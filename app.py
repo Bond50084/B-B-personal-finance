@@ -183,7 +183,7 @@ def run():
         # --- Plot 4: Histogram of Final Total Wealth ---
         fig4, ax4 = plt.subplots(figsize=(10, 6))
         final = total_paths[:, -1]
-        ax4.hist(final, bins=100, density=True, alpha=0.8, color='skyblue', edgecolor='black')
+        ax4.hist(final, bins=40, density=True, alpha=0.8, color='skyblue', edgecolor='black')
         ax4.axvline(median_final_wealth, color='red', linestyle='--', label=f'Median Final Wealth: €{median_final_wealth:,.0f}')
         ax4.axvline(percentile_5, color = 'black', label= f'5th Percentile: €{percentile_5:,.0f}', linestyle='--')
         ax4.set_xlabel('Final Total Wealth (€)')
@@ -214,8 +214,8 @@ def run():
         ax6.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True) 
         # Hide the generic text added by apply_scientific_style and add it back manually if needed
         # apply_scientific_style(ax6, plot_params_text) # This will add the text twice if not careful
-        ax6.text(0.02, 0.98, plot_params_text, transform=ax6.transAxes,
-                    fontsize=9, verticalalignment='top', bbox=dict(boxstyle='round,pad=0.5', fc='wheat', alpha=0.6))
+        #ax6.text(0.02, 0.98, plot_params_text, transform=ax6.transAxes,
+         #           fontsize=9, verticalalignment='top', bbox=dict(boxstyle='round,pad=0.5', fc='wheat', alpha=0.6))
         plots['plot6'] = plot_to_base64(fig6)
 
         # --- Plot 7: Annual Net Cash Flow (Bar Chart) ---
@@ -245,7 +245,7 @@ def run():
         apply_scientific_style(ax8, plot_params_text)
         plots['plot8'] = plot_to_base64(fig8)
 
-        return render_template('results.html', plots=plots, final_wealth=f"€{median_final_wealth_today_s_power_before_taxes:,.0f}")
+        return render_template('results.html', plots=plots, final_wealth=f"€{median_final_wealth_today_s_power_before_taxes:,.0f}", final_wealth_after_tax = f"€{median_final_wealth_after_taxes}")
 
     except ValueError as e:
         # Handle invalid input errors
