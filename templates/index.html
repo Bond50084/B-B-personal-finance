@@ -41,9 +41,7 @@
       .top-bar .logo-small {
         height: 60px;
         width: auto;
-        filter: invert(
-          100%
-        ); /* Invert logo colors to white for black background */
+        /* STYLEEE 1 Invert logo colors to white for black background */
       }
 
       .top-bar .firm-name {
@@ -114,6 +112,8 @@
         font-weight: 700;
         margin-bottom: 20px;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        /* Add or change this line: */
+        color: #fff; /* Ensure this is white */
       }
 
       .hero-subtitle {
@@ -139,12 +139,12 @@
       /* Content Section */
       .content-section {
         padding: 40px 20px;
-        max-width: 900px; /* Keep max-width for internal content if needed */
-        margin: 0 auto; /* Center content within the wrapper */
-        background-color: #000; /* Black background for content */
+        max-width: 900px;
+        margin: 0 auto;
+        background-color: #ffffff; /* Changed to white background for content */
         border-radius: 8px;
         box-shadow: 0 0 0 rgba(0, 0, 0, 0); /* No shadow for high contrast */
-        border: 1px solid #fff; /* Add a border to the content section itself */
+        border: 1px solid #000; /* Changed border to black */
       }
       @keyframes fadeInUp {
         from {
@@ -160,90 +160,22 @@
       /* Apply the animation to the explanation text */
       .explanation-text {
         text-align: center;
-        margin-top: 20px;
-        margin-bottom: 30px;
-        color: #ccc;
-        font-size: 1.3em; /* Increased font size */
+        margin: 20px auto 30px;
+        background-color: #fff;
+        border: 1px solid #000;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 1.3em;
         line-height: 1.5;
         max-width: 700px;
-        margin-left: auto;
-        margin-right: auto;
 
-        /* Animation properties */
+        /* CORRECT BLACK TEXT */
+        color: #000;
+
+        /* Animation (if you still want it) */
         opacity: 0;
         transform: translateY(20px);
-        animation: fadeInUp 1s ease-out 0.5s forwards;
-      }
-      .top-bar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 80px;
-        background-color: #000; /* Changed to black */
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        padding: 0 20px;
-        box-sizing: border-box;
-        border: 1px solid #fff; /* Added white border */
-        /* New shadow: X-offset, Y-offset, Blur-radius, Spread-radius, Color */
-        /* This creates a soft, blurred shadow that emanates from the bar */
-        box-shadow: 0 10px 20px 0px rgba(0, 0, 0, 0.7);
-      }
-
-      .top-bar .logo-small {
-        height: 60px;
-        width: auto;
-        filter: invert(
-          100%
-        ); /* Invert logo colors to white for black background */
-      }
-
-      .top-bar .firm-name {
-        font-family: "Arial", sans-serif;
-        font-size: 1.8em;
-        font-weight: 700;
-        color: #fff; /* Changed text color to white for black background */
-        margin-left: 15px;
-        white-space: nowrap;
-      }
-
-      /* Keyframes for the pop-up animation - ensure this is also in your CSS */
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      /* Corrected .explanation-text CSS rule */
-      .explanation-text {
-        /* <-- This selector and opening brace were missing/misplaced */
-        text-align: center;
-        margin-top: 20px;
-        margin-bottom: 30px;
-        color: #ccc;
-        font-size: 1.3em; /* Existing font size */
-        line-height: 1.5;
-        max-width: 700px;
-        margin-left: auto;
-        margin-right: auto;
-
-        /* Animation properties */
-        opacity: 0; /* Initially hide the text */
-        transform: translateY(
-          20px
-        ); /* Set initial position for slide-up effect */
-        animation: fadeInUp 3s ease-out 0.5s forwards; /* Animation name, duration, timing function, delay, and fill mode */
-      }
-
-      .explanation-text p {
-        margin-bottom: 10px;
+        animation: fadeInUp 3s ease-out 0.5s forwards;
       }
 
       .header {
@@ -266,14 +198,14 @@
       h1,
       h2 {
         font-family: "Arial", sans-serif;
-        color: #fff; /* White headings */
+        color: #000; /* Changed headings to black */
         text-align: center;
         margin-bottom: 20px;
         font-size: 2.5em;
       }
 
       h2 {
-        border-bottom: 2px solid #fff; /* White underline */
+        border-bottom: 2px solid #000; /* Changed underline to black */
         padding-bottom: 5px;
         margin-top: 30px;
         margin-bottom: 20px;
@@ -282,13 +214,13 @@
 
       /* Form Styling */
       form {
-        background-color: #000; /* Black background for the form */
+        background-color: #f0f0f0; /* Changed to a soft white for the form */
         padding: 30px;
         border-radius: 8px;
         box-shadow: 0 0 0 rgba(0, 0, 0, 0); /* No shadow for high contrast */
         max-width: 900px;
         margin: 0 auto;
-        border: 1px solid #fff; /* White border for form */
+        border: 1px solid #000; /* Changed border to black for consistency */
       }
 
       .form-group {
@@ -302,7 +234,7 @@
         display: inline-block;
         width: 250px;
         font-weight: 600;
-        color: #fff; /* White labels */
+        color: #000; /* Changed labels to black */
         flex-shrink: 0;
         margin-right: 15px;
       }
@@ -313,9 +245,9 @@
         flex-grow: 1;
         max-width: 250px;
         padding: 10px;
-        border: 1px solid #fff; /* White border for inputs */
-        background-color: #000; /* Black background for inputs */
-        color: #fff; /* White text for inputs */
+        border: 1px solid #000; /* Changed border to black */
+        background-color: #ffffff; /* Changed background to white */
+        color: #000; /* Changed text to black */
         border-radius: 5px;
         font-size: 1em;
         box-sizing: border-box;
@@ -323,7 +255,7 @@
 
       .explanation {
         font-size: 0.85em;
-        color: #ccc; /* Light grey for explanations */
+        color: #000; /* Changed explanations to black */
         margin-left: 20px;
         flex-basis: 300px;
         min-width: 200px;
@@ -393,6 +325,9 @@
         .scrolling-content-wrapper {
           width: 90%; /* Adjust width for smaller screens */
         }
+        .content-section .explanation-text {
+          color: #000 !important;
+        }
       }
     </style>
   </head>
@@ -427,8 +362,10 @@
               This calculator allows you to plan your future financial journey
               by simulating various scenarios. Input your income streams,
               expenses, and investment strategies to visualize your financial
-              growth over time and ensure you meet your goals.
+              growth over time and ensure you meet your goals. For a detailled
+              explanation of the simulation logic, see:
             </p>
+            <a href="{{ url_for('documentation') }}">Documentation</a>
           </div>
           <h1>Financial Simulation Parameters</h1>
         </div>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Financial Simulator • Everything Explained</title>
+    <!-- Google Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Tailwind (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* ------------------------------
+         Global & Layout Styles
+         ------------------------------ */
+      body {
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+        color: #111;
+        /* replace white bg with your image */
+        background-image: url("static/doc_img.png");
+        background-size: cover; /* make it cover the whole viewport */
+        background-position: center; /* center it */
+        background-repeat: no-repeat; /* don’t tile */
+      }
+      main {
+        padding-top: 100px; /* give room for fixed top bar */
+      }
+
+      /* ------------------------------
+         Top Bar (exactly as you had it)
+         ------------------------------ */
+      .top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        background-color: #000;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        box-sizing: border-box;
+      }
+      .logo-small {
+        height: 50px;
+        margin-right: 15px;
+      }
+      .firm-name {
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+
+      /* ------------------------------
+         Hero Section (same bg image)
+         ------------------------------ */
+      .hero-section {
+        width: 100%;
+        height: 100vh;
+        background-image: url("static/finance_background.png");
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #fff;
+      }
+      .hero-section h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+        margin: 0;
+      }
+      .hero-section p {
+        font-size: 1.25rem;
+        margin-top: 0.5em;
+      }
+
+      /* ------------------------------
+         Fade-in Animation
+         ------------------------------ */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .fade-in {
+        opacity: 0;
+        animation: fadeInUp 1s ease-out forwards;
+      }
+      .delay-1 {
+        animation-delay: 0.5s;
+      }
+      .delay-2 {
+        animation-delay: 1s;
+      }
+
+      /* ------------------------------
+         Content Sections
+         ------------------------------ */
+      .section {
+        max-width: 800px;
+        margin: 4rem auto;
+        padding: 0 1rem;
+      }
+      .section h2 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+      }
+      .section p {
+        margin-bottom: 1.25rem;
+      }
+      .section ul {
+        list-style-type: disc;
+        margin-left: 1.5rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Top Bar (unchanged) -->
+    <div class="top-bar">
+      <img
+        src="static/logo.png"
+        alt="B & B Capital Management Logo"
+        class="logo-small"
+      />
+      <span class="firm-name"
+        >B & B Capital Management – Personal Financial Simulator</span
+      >
+    </div>
+
+    <main>
+      <!-- Hero -->
+
+      <!-- Overview -->
+      <section id="overview" class="section fade-in delay-2">
+        <h2>What Is This?</h2>
+        <p>
+          This interactive simulator helps you model your personal finances—
+          from budgeting and saving, to investing and retirement planning.
+          Whether you’re just getting started or looking to optimize a complex
+          portfolio, everything is laid out step by step.
+        </p>
+      </section>
+
+      <!-- How It Works -->
+      <section id="how-it-works" class="section">
+        <h2>How It Works</h2>
+        <ul>
+          <li>
+            <strong>Input Your Data:</strong> Enter income streams, expenses,
+            debts, and assets.
+          </li>
+          <li>
+            <strong>Run Simulations:</strong> Project cash flow under various
+            scenarios.
+          </li>
+          <li>
+            <strong>Visualize Outcomes:</strong> Charts and tables make complex
+            numbers crystal-clear.
+          </li>
+          <li>
+            <strong>Adjust & Optimize:</strong> Tweak assumptions to see how
+            decisions impact your future.
+          </li>
+        </ul>
+      </section>
+
+      <!-- Key Features -->
+      <section id="features" class="section">
+        <h2>Key Features</h2>
+        <ul>
+          <li>Real-time budgeting dashboard</li>
+          <li>Automated savings recommendations</li>
+          <li>Investment portfolio heatmaps</li>
+          <li>Goal-based retirement planning</li>
+          <li>Downloadable reports & charts</li>
+        </ul>
+      </section>
+
+      <!-- FAQ -->
+      <section id="faq" class="section">
+        <h2>Frequently Asked Questions</h2>
+        <p>
+          <strong>Q:</strong> Is my data secure?<br />
+          <strong>A:</strong> All inputs stay in your browser—nothing is stored
+          on our servers.
+        </p>
+        <p>
+          <strong>Q:</strong> Can I export results?<br />
+          <strong>A:</strong> Yes! Export any report as PDF or CSV.
+        </p>
+      </section>
+
+      <!-- Contact -->
+      <section id="contact" class="section">
+        <h2>Need Help?</h2>
+        <p>
+          Reach out to our support team at
+          <a href="mailto:support@bbcapital.com" class="text-blue-600 underline"
+            >support@bbcapital.com</a
+          >, or follow us on
+          <a href="#" class="text-blue-600 underline">Twitter</a> |
+          <a href="#" class="text-blue-600 underline">LinkedIn</a>.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

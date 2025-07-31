@@ -62,6 +62,12 @@ def index():
     """Renders the main input form page."""
     return render_template('index.html')
 
+
+@app.route('/documentation')
+def documentation():
+    return render_template('documentation.html')
+
+
 @app.route('/run', methods=['POST'])
 def run():
     """
@@ -245,7 +251,7 @@ def run():
         apply_scientific_style(ax8, plot_params_text)
         plots['plot8'] = plot_to_base64(fig8)
 
-        return render_template('results.html', plots=plots, final_wealth=f"€{median_final_wealth_today_s_power_before_taxes:,.0f}", final_wealth_after_tax = f"€{median_final_wealth_after_taxes}")
+        return render_template('results.html', plots=plots, final_wealth=f"€{median_final_wealth:,.0f}", final_wealth_after_tax = f"€{median_final_wealth_after_taxes:,.0f}")
 
     except ValueError as e:
         # Handle invalid input errors

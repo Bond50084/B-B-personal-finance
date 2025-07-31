@@ -32,7 +32,7 @@
         z-index: 1000;
         display: flex;
         align-items: center;
-        justify-content: flex-start; /* Added/Ensured this line */
+        justify-content: flex-start; /* This ensures items are at the start (left) */
         padding: 0 20px; /* This padding will keep a 20px gap from the very left edge */
         box-sizing: border-box;
         border: 1px solid #fff; /* White border */
@@ -42,7 +42,8 @@
       .top-bar .logo-small {
         height: 60px;
         width: auto;
-        filter: invert(100%); /* Invert logo for black background */
+        filter: invert(100%);
+        margin-left: 8px; /* Example: add 20px margin to the left of the logo */
       }
 
       .top-bar .firm-name {
@@ -50,7 +51,7 @@
         font-size: 1.8em;
         font-weight: 700;
         color: #fff; /* White for black background */
-        margin-left: 15px;
+        margin-left: 5px;
         white-space: nowrap;
       }
 
@@ -185,7 +186,6 @@
     <h1>Simulation Results</h1>
 
     <div class="summary-container">
-      <h2>Simulation Summary</h2>
       <p>
         Your projected median wealth at the end of the simulation is:
         <strong>{{ final_wealth }}</strong>.
