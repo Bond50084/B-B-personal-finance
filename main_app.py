@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 # Import the simulation function from your uploaded file
-from simulation_v2_inflation import run_simulation
+from simulator_app.simulation_v2_inflation import run_simulation
 
 # Matplotlib configuration for web serving
 import matplotlib
@@ -56,19 +56,29 @@ def apply_scientific_style(ax, plot_params_text=""):
     if plot_params_text:
         ax.text(0.02, 0.98, plot_params_text, transform=ax.transAxes,
                 fontsize=9, verticalalignment='top', bbox=dict(boxstyle='round,pad=0.5', fc='wheat', alpha=0.6))
-
+# Define route for the main website's index page
 @app.route('/')
-def index():
-    """Renders the main input form page."""
-    return render_template('index.html')
+def main_index():
+    """Renders the main website's index.html page."""
+    # OLD: return render_template('index.html')
+    # NEW: The main site's index is now in templates/site/index.html
+    return render_template('site/index.html') # CHANGED LINE
+
+# Define route for the simulator's main input form page
+@app.route('/simulator/') # Added a base route for the simulator
+def simulator_index():
+    """Renders the simulator's main input form page."""
+    # This refers to the index.html that was originally in simulator_app/actual_hosting_stuff/templates/index.html
+    return render_template('index.html') # NEW ROUTE AND TEMPLATE PATH
+
+# Define route for the simulator's documentation page
+@app.route('/simulator/documentation') # Added a base route for the simulator
+def simulator_documentation():
+    # This refers to documentation.html that was originally in simulator_app/actual_hosting_stuff/templates/documentation.html
+    return render_template('documentation.html') # NEW ROUTE AND TEMPLATE PATH
 
 
-@app.route('/documentation')
-def documentation():
-    return render_template('documentation.html')
-
-
-@app.route('/run', methods=['POST'])
+@app.route('/simulator/run', methods=['POST'])
 def run():
     """
     Handles the simulation request, runs the simulation, generates plots,

@@ -22,7 +22,8 @@
         line-height: 1.6;
         color: #111;
         /* replace white bg with your image */
-        background-image: url("static/doc_img.png");
+        background-image: url("{{ url_for('static', filename='simulator/doc_img.png') }}"); /* ADDED/CHANGED LINE */
+
         background-size: cover; /* make it cover the whole viewport */
         background-position: center; /* center it */
         background-repeat: no-repeat; /* don’t tile */
