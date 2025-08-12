@@ -62,7 +62,7 @@ def main_index():
     """Renders the main website's index.html page."""
     # OLD: return render_template('index.html')
     # NEW: The main site's index is now in templates/site/index.html
-    return render_template('site/index.html') # CHANGED LINE
+    return render_template('site/main_index.html') # CHANGED LINE
 
 # Define route for the simulator's main input form page
 @app.route('/simulator/') # Added a base route for the simulator
@@ -77,6 +77,9 @@ def simulator_documentation():
     # This refers to documentation.html that was originally in simulator_app/actual_hosting_stuff/templates/documentation.html
     return render_template('documentation.html') # NEW ROUTE AND TEMPLATE PATH
 
+@app.route("/correlation-finder")
+def correlation_index():
+    return render_template("correlation_finder.html")
 
 @app.route('/simulator/run', methods=['POST'])
 def run():

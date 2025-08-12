@@ -31,6 +31,43 @@
 
     <style>
       /* ... existing style block ... */
+      .options-frame {
+        /* Removed the border from here as individual boxes will have it */
+        padding: 20px;
+        border-radius: 10px; /* Optional: for rounded corners around the whole section */
+        display: flex; /* To make sure columns behave correctly inside */
+        justify-content: center; /* Center the boxes */
+        align-items: stretch; /* This is key to making boxes the same height */
+      }
+
+      .options-frame .col {
+        flex: 1; /* Each column takes equal width */
+        margin: 0 15px; /* Add more space between columns */
+        padding: 25px; /* Padding inside each column */
+        background-color: rgba(
+          255,
+          255,
+          255,
+          0.05
+        ); /* Slightly visible background for each option */
+        border: 2px solid white; /* White border around each individual box */
+        border-radius: 8px; /* Rounded corners for individual options */
+        display: flex; /* Use flexbox for content inside each column */
+        flex-direction: column; /* Stack content vertically */
+        justify-content: space-between; /* Distribute space vertically */
+      }
+
+      .options-frame .col h1 {
+        margin-top: 0; /* Remove default top margin for headings */
+      }
+
+      .options-frame .col .lead {
+        flex-grow: 1; /* Allow the lead paragraph to take available space */
+      }
+
+      .options-frame .col .btn {
+        margin-top: auto; /* Push the button to the bottom if content is short */
+      }
     </style>
   </head>
 
@@ -74,7 +111,9 @@
         </div>
       </header>
       <main class="px-3">
-        <div class="row text-center">
+        <h2 class="mb-4 text-white">Our Products:</h2>
+
+        <div class="row text-center options-frame">
           <div class="col">
             <h1>Financial Freedom Awaits</h1>
             <p class="lead">
