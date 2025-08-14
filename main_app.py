@@ -59,27 +59,17 @@ def apply_scientific_style(ax, plot_params_text=""):
 # Define route for the main website's index page
 @app.route('/')
 def main_index():
-    """Renders the main website's index.html page."""
-    # OLD: return render_template('index.html')
-    # NEW: The main site's index is now in templates/site/index.html
-    return render_template('site/main_index.html') # CHANGED LINE
+    return render_template('main_index.html', active_page='home')
 
-# Define route for the simulator's main input form page
-@app.route('/simulator/') # Added a base route for the simulator
+@app.route('/simulator')
 def simulator_index():
-    """Renders the simulator's main input form page."""
-    # This refers to the index.html that was originally in simulator_app/actual_hosting_stuff/templates/index.html
-    return render_template('index.html') # NEW ROUTE AND TEMPLATE PATH
+    return render_template('simulator_parameters.html', active_page='simulator')
 
-# Define route for the simulator's documentation page
-@app.route('/simulator/documentation') # Added a base route for the simulator
+@app.route('/simulator/documentation')
 def simulator_documentation():
-    # This refers to documentation.html that was originally in simulator_app/actual_hosting_stuff/templates/documentation.html
-    return render_template('documentation.html') # NEW ROUTE AND TEMPLATE PATH
+    # This would be a new page for your documentation
+    return render_template('documentation.html', active_page='documentation') # You'll need to create documentation.html
 
-@app.route("/correlation-finder")
-def correlation_index():
-    return render_template("correlation_finder.html")
 
 @app.route('/simulator/run', methods=['POST'])
 def run():
@@ -108,12 +98,13 @@ def run():
         second_person_job_end = request.form['felix_job_end']
         second_person_rente_val = float(request.form['felix_rente_val'])
         second_person_rente_start = request.form['felix_rente_start']
+        initial_monthly_expenses = float(request.form['initial_monthly_expenses']) 
 
         large_payment1_val = float(request.form['large_payment1_val'])
         large_payment1_date = request.form['large_payment1_date']
         large_payment2_val = float(request.form['large_payment2_val'])
         large_payment2_date = request.form['large_payment2_date']
-        other_monthly_expenses = float(request.form['other_monthly_expenses'])
+        #other_monthly_expenses = float(request.form['other_monthly_expenses'])
 
         # Run the simulation
         t, median_total, df, p5_total, p80_total, prob_below_threshold, prob_zero_cash, \
@@ -123,16 +114,16 @@ def run():
                            first_person_job_val, first_person_job_start, first_person_job_end,
                            first_person_rente_val, first_person_rente_start,
                            second_person_rente_val, second_person_rente_start,
-                           second_person_job_val, second_person_job_start, second_person_job_end,
+                           second_person_job_val, second_person_job_start, second_person_job_end, initial_monthly_expenses,
                            large_payment1_val, large_payment1_date,
                            large_payment2_val, large_payment2_date,
-                           other_monthly_expenses, selected_market_index, inflation_rate)
+                           selected_market_index, inflation_rate)
 
         # Calculate additional parameters for display
         initial_portfolio_value = initial_cash * invest_frac
         median_final_wealth = median_total[-1]
         percentile_5 = np.percentile(total_paths[:, -1], 5)
-        inital_monthly_expenses_total = df['expenses'].iloc[0]
+        inital_monthly_expenses_total = initial_monthly_expenses
         median_final_wealth_after_taxes = median_final_wealth * (1- 0.26)
         
         months = len(df)
@@ -169,6 +160,8 @@ def run():
         apply_scientific_style(ax1, plot_params_text)
         ax1.xaxis.set_major_locator(ticker.MultipleLocator(5))
         ax1.xaxis.set_minor_locator(ticker.MultipleLocator(1))
+        ax1.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x)}y'))
+        ax1.legend(loc='upper right', fontsize=9, frameon=True, shadow=True, fancybox=True)
         plots['plot1'] = plot_to_base64(fig1)
 
         # --- Plot 2: Cumulative Cash Components Over Time ---
@@ -268,10 +261,10 @@ def run():
 
     except ValueError as e:
         # Handle invalid input errors
-        return render_template('index.html', error=f"Input Error: {e}")
+        return render_template('simulator_parameters.html', error=f"Input Error: {e}")
     except Exception as e:
         # Handle any other unexpected errors
-        return render_template('index.html', error=f"An unexpected error occurred: {e}")
+        return render_template('simulator_parameters.html', error=f"An unexpected error occurred: {e}")
 
 if __name__ == '__main__':
     # This block is for local development. In a Canvas environment, the app is run differently.

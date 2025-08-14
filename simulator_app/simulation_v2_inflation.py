@@ -7,10 +7,10 @@ def run_simulation(start_date_str, end_date_str, initial_cash, invest_frac, thre
                    first_person_job_val, first_person_job_start, first_person_job_end,
                    first_person_rente_val, first_person_rente_start,
                    second_person_rente_val, second_person_rente_start,
-                   second_person_job_val, second_person_job_start, second_person_job_end,
+                   second_person_job_val, second_person_job_start, second_person_job_end, initial_monthly_expenses,
                    large_payment1_val, large_payment1_date,
                    large_payment2_val, large_payment2_date,
-                   other_monthly_expenses, selected_market_index, inflation_rate):
+                    selected_market_index, inflation_rate):
     try:
         # PARAMETERS
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
@@ -39,13 +39,10 @@ def run_simulation(start_date_str, end_date_str, initial_cash, invest_frac, thre
 
         # BUILD MONTHLY CASH-FLOW DF
         df = pd.DataFrame(index=pd.date_range(start_date, end_date, freq='M'))
-        
+        '''
         # Initialize original fixed expenses
         original_fixed_expenses = {}
-        for col,val in [('miete',2500),('essen',500),('auto',100),
-                        ('kvg',1300),('strom',100),('freizeit',200)]:
-            original_fixed_expenses[col] = val
-            df[col] = val
+        
         
         # Initialize original job and rente values
         original_first_person_job_val = first_person_job_val
@@ -58,16 +55,14 @@ def run_simulation(start_date_str, end_date_str, initial_cash, invest_frac, thre
             inflation_factor = inflation_rate_monthly**i
             for col, val in original_fixed_expenses.items():
                 df.loc[df.index[i], col] = val * inflation_factor
-            
-            # Apply inflation to other monthly expenses
-            df.loc[df.index[i], 'other_monthly_expenses_inflated'] = other_monthly_expenses * inflation_factor
         
-        df['fixed_expenses'] = df[['miete','essen','auto','kvg','strom','freizeit']].sum(axis=1)
-        df['expenses'] = df['fixed_expenses'] + df['other_monthly_expenses_inflated']
-
-        # Add randomness to monthly expenses (10% of mean fluctuation)
-        random_factors = np.random.uniform(0.95, 1.05, size=len(df))
-        df['expenses'] = df['expenses']# * random_factors
+        '''
+            
+        df['expenses'] = initial_monthly_expenses * (inflation_rate_monthly ** np.arange(len(df)))
+        
+        # Optional: Add randomness to monthly expenses (10% of mean fluctuation) if desired
+        # random_factors = np.random.uniform(0.95, 1.05, size=len(df))
+        # df['expenses'] = df['expenses'] * random_factors
 
         def H(val, s, e, inflation_series):
             # Convert start and end dates to datetime objects if they are strings
@@ -87,10 +82,10 @@ def run_simulation(start_date_str, end_date_str, initial_cash, invest_frac, thre
         income_inflation_factors = pd.Series([inflation_rate_monthly**i for i in range(len(df))], index=df.index)
 
         # Apply user-defined income streams with inflation
-        df['first_person_job']   = H(original_first_person_job_val, first_person_job_start, first_person_job_end, income_inflation_factors)
-        df['first_person_rente'] = H(original_first_person_rente_val, first_person_rente_start, end_date_str, income_inflation_factors)
-        df['second_person_job']    = H(original_second_person_job_val, second_person_job_start, second_person_job_end, income_inflation_factors)
-        df['second_person_rente']  = H(original_second_person_rente_val, second_person_rente_start, end_date_str, income_inflation_factors)
+        df['first_person_job']   = H(first_person_job_val, first_person_job_start, first_person_job_end, income_inflation_factors)
+        df['first_person_rente'] = H(first_person_rente_val, first_person_rente_start, end_date_str, income_inflation_factors)
+        df['second_person_job']    = H(second_person_job_val, second_person_job_start, second_person_job_end, income_inflation_factors)
+        df['second_person_rente']  = H(second_person_rente_val, second_person_rente_start, end_date_str, income_inflation_factors)
         df['income']       = df[['first_person_job','first_person_rente','second_person_job','second_person_rente']].sum(axis=1)
 
         # Add large payments/withdrawals (these are assumed to be in today's terms and not inflated)
@@ -110,6 +105,8 @@ def run_simulation(start_date_str, end_date_str, initial_cash, invest_frac, thre
         cum_large_payments = np.concatenate(([0], df['large_payments'].cumsum().values)) # Although not plotted here, useful to return
         cum_net = np.concatenate(([0], df['net_cash'].cumsum().values))
         
+
+        capital_gains_tax_rate = 0.25
         # MONTE CARLO SIMULATION at MONTHLY STEPS
         months          = len(df)
         initial_port    = initial_cash * invest_frac
@@ -126,7 +123,7 @@ def run_simulation(start_date_str, end_date_str, initial_cash, invest_frac, thre
             cash  = np.zeros(months+1)
             port  = np.zeros(months+1)
             cash[0], port[0] = initial_cash_ac, initial_port
-
+            cost_basis_for_sim = initial_port
             for t_idx in range(1, months+1):
                 r = np.random.choice(monthly_returns, p=probs)
                 port[t_idx] = port[t_idx-1] * (1 + r)
@@ -138,17 +135,55 @@ def run_simulation(start_date_str, end_date_str, initial_cash, invest_frac, thre
                     cash[t_idx] = cash[t_idx-1] + current_net_cash_flow_without_large_payment + large_payment_val
                     if cash[t_idx] < threshold_cash:
                         shortfall = threshold_cash - cash[t_idx]
-                        port[t_idx] -= shortfall
-                        cash[t_idx] = threshold_cash
+                        unrealized_gain = port[t_idx] - cost_basis_for_sim
+                        #port[t_idx] -= shortfall
+                        #cash[t_idx] = threshold_cash
+                        if unrealized_gain > 0:
+                            # Calculate the total amount to sell to cover the shortfall AND the resulting tax.
+                            # This formula solves for the gross withdrawal needed.
+                            # Let W=Withdrawal, S=Shortfall, G=Gain_Ratio, T=Tax_Rate. We need: W - (W*G)*T = S => W = S / (1 - G*T)
+                            gain_ratio = unrealized_gain / port[t_idx]
+                            gross_withdrawal_amount = shortfall / (1 - gain_ratio * capital_gains_tax_rate)
+                            
+                            # Reduce the portfolio by the gross withdrawal amount
+                            port[t_idx] -= gross_withdrawal_amount
+                            
+                            # Reduce the cost basis proportionally to the fraction of the portfolio sold
+                            fraction_sold = gross_withdrawal_amount / (port[t_idx] + gross_withdrawal_amount) # portfolio value before selling
+                            cost_basis_for_sim -= cost_basis_for_sim * fraction_sold
+                        else: # No gains, so no tax on withdrawal
+                            port[t_idx] -= shortfall    
+                        
                 elif large_payment_val > 0:
                     cash[t_idx] = cash[t_idx-1] + current_net_cash_flow_without_large_payment
                     port[t_idx] += large_payment_val
+                    cost_basis_for_sim += large_payment_val
                 else:
                     cash[t_idx] = cash[t_idx-1] + current_net_cash_flow_without_large_payment
                 if large_payment_val >= 0 and cash[t_idx] < threshold_cash:
                     shortfall = threshold_cash - cash[t_idx]
-                    port[t_idx]  -= shortfall
-                    cash[t_idx]  = threshold_cash
+
+                    # --- START: NEW TAX LOGIC ---
+                    unrealized_gain = port[t_idx] - cost_basis_for_sim
+
+                    # Only apply tax if there is an unrealized gain in the portfolio
+                    if unrealized_gain > 0:
+                        # Calculate the total amount to sell to cover the shortfall AND the resulting tax.
+                        gain_ratio = unrealized_gain / port[t_idx]
+                        gross_withdrawal_amount = shortfall / (1 - gain_ratio * capital_gains_tax_rate)
+                        
+                        # Reduce the portfolio by the gross withdrawal amount
+                        port[t_idx] -= gross_withdrawal_amount
+                        
+                        # Reduce the cost basis proportionally to the fraction of the portfolio sold
+                        fraction_sold = gross_withdrawal_amount / (port[t_idx] + gross_withdrawal_amount) # portfolio value before selling
+                        cost_basis_for_sim -= cost_basis_for_sim * fraction_sold
+                    
+                    else: # No gains, so no tax on withdrawal
+                        port[t_idx] -= shortfall
+                    # --- END: NEW TAX LOGIC ---
+
+                    cash[t_idx] = threshold_cash # Top up cash to the threshold amount
 
                 if cash[t_idx] < threshold_cash:
                     cash_below_threshold_count[t_idx] += 1
