@@ -22,20 +22,13 @@ block body_class %}vignette-results{% endblock %} {% block head_extra %}
   }
 
   .results-container {
-    max-width: 1100px; /* Increased max width */
-    margin: 0 auto;
-    padding: 20px;
-    text-align: center;
+    max-width: 2000px;
   }
 
   .summary-container,
   .plot-container {
-    background-color: #1a1a1a; /* Dark grey instead of pure black */
-    padding: 25px; /* Slightly more padding */
-    border-radius: 8px;
-    border: 1px solid #fff;
+    padding: 25px;
     margin-bottom: 35px;
-    box-sizing: border-box;
   }
 
   .summary-container p {
@@ -73,20 +66,33 @@ block body_class %}vignette-results{% endblock %} {% block head_extra %}
     background-color: #333;
     color: #fff;
   }
+
+  #fade-in-summary {
+    opacity: 0; /* Start completely transparent */
+    display: block; /* Ensures it takes up its own block if it contains multiple lines */
+  }
+
+  /* Define the fade-in animation */
+  @keyframes fadeInAnimation {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Class to trigger the animation */
+  #fade-in-summary.start-fade {
+    animation: fadeInAnimation 5s ease-in forwards; /* Adjust 5s for duration */
+  }
 </style>
 {% endblock %} {% block content %}
 <div class="results-container">
   <h1>Simulation Results</h1>
 
   <div class="summary-container">
-    <p>
-      Your projected median wealth at the end of the simulation is:
-      <strong>{{ final_wealth }}</strong>.
-    </p>
-    <p>
-      The estimated after-tax value of your final wealth is:
-      <strong>{{ final_wealth_after_tax | default("N/A") }}</strong>.
-    </p>
+    <p>{{ simulation_summary | safe }}</p>
   </div>
 
   <div class="plot-container">
@@ -138,15 +144,35 @@ block body_class %}vignette-results{% endblock %} {% block head_extra %}
   </div>
 
   <div class="plot-container">
-    <h2>Cumulative Impact of Large Financial Events</h2>
+    <h2>Cumulated Density Function</h2>
     <img
       src="data:image/png;base64,{{ plots.plot8 }}"
-      alt="Cumulative Impact of Large Financial Events"
+      alt="Cumulated Density Function"
     />
   </div>
 
-  <a href="{{ url_for('main_index') }}" class="btn-simulation"
+  <a href="{{ url_for('simulator_index') }}" class="btn-simulation"
     >Run another simulation</a
   >
 </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const summaryElement = document.getElementById("fade-in-summary");
+    const startDelay = 2000; // 2 seconds delay before animation starts (adjust as needed)
+
+    setTimeout(() => {
+      summaryElement.classList.add("start-fade");
+    }, startDelay);
+  });
+</script>
+
+<div
+  class="download-button-container"
+  style="text-align: center; margin-top: 20px"
+>
+  <a href="{{ url_for('download_report') }}" class="btn btn-primary" download>
+    Download Full Report (PDF) 📄
+  </a>
+</div>
+
 {% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %} {% block title %}Financial Simulator • Everything
+Explained{% endblock %} {% block head_extra %}
+<style>
+  main {
+    padding-top: 100px; /* space for fixed top bar */
+    max-width: 800px;
+    margin: 0 auto 4rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    color: #fff; /* dark text */
+  }
+
+  section {
+    margin-bottom: 3rem;
+  }
+
+  section h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  section p,
+  section ul {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  ul {
+    padding-left: 1.5rem;
+    list-style-type: disc;
+  }
+
+  a {
+    color: #0d6efd; /* site blue */
+    text-decoration: underline;
+  }
+  a:hover {
+    text-decoration: none;
+  }
+</style>
+{% endblock %} {% block content %}
+<section id="overview">
+  <h2>Contact & Support</h2>
+  <p>
+    In case you have any questions to our products, or want to reach out to us
+    concerning business, feel free to do so by writing to: <br /><br />
+    <a href="mailto:behrens-behrens@protonmail.com"
+      >behrens-behrens@protonmail.com</a
+    >
+  </p>
+</section>
+
+<section id="contact">
+  <h2>Need Help?</h2>
+  <p>
+    Reach out to our support team at
+    <a href="mailto:behrens-behrens@protonmail.com"
+      >behrens-behrens@protonmail.com</a
+    >, or follow us on <a href="#">Twitter</a> | <a href="#">LinkedIn</a>.
+  </p>
+</section>
+{% endblock %}

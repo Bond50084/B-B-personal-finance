@@ -3,7 +3,7 @@ Explained{% endblock %} {% block head_extra %}
 <style>
   main {
     padding-top: 100px; /* space for fixed top bar */
-    max-width: 800px;
+    max-width: 1600px;
     margin: 0 auto 4rem;
     padding-left: 1rem;
     padding-right: 1rem;
@@ -42,15 +42,182 @@ Explained{% endblock %} {% block head_extra %}
 </style>
 {% endblock %} {% block content %}
 <section id="overview">
-  <h2>What Is This?</h2>
+  <h2>How the simulation works:</h2>
   <p>
-    This interactive simulator helps you model your personal finances— from
-    budgeting and saving, to investing and retirement planning. Whether you’re
-    just getting started or looking to optimize a complex portfolio, everything
-    is laid out step by step.
+    This financial simulation helps you predict your financial future by running
+    many possible scenarios. It considers your income, expenses, investments,
+    and even unexpected large payments to show you how your cash and investment
+    portfolio might change over time. It's like a crystal ball for your money,
+    but instead of one prediction, it gives you 100 different possibilities! 🔮
+  </p>
+
+  <h3>How it Works: The Logic Explained</h3>
+  <p>
+    The simulation essentially follows your money month by month, from a
+    <b>start date</b> to an <b>end date</b> you choose. Here's a breakdown of
+    the key steps:
+  </p>
+
+  <h4>1. Setting Up Your Financial Picture</h4>
+  <ul>
+    <li>
+      <b>Starting Point</b>: You tell the simulation how much <b>cash</b> you
+      have initially. A portion of this cash is immediately put into an
+      <b>investment fund</b> (like an S&P 500 or Euro Stoxx 50 fund), and the
+      rest stays as cash in your bank account.
+    </li>
+    <li>
+      <b>Income</b>: You define all your regular income sources, like
+      <b>salaries from jobs</b> for two people and
+      <b>pension payments (rente)</b>. You specify when these incomes start and,
+      for jobs, when they end.
+    </li>
+    <li><b>Expenses</b>: You set your initial monthly expenses.</li>
+    <li>
+      <b>Big Events</b>: You can also add <b>large, one-time payments</b> that
+      might happen, like a house down payment or a bonus. These can be inflows
+      (money coming in) or outflows (money going out).
+    </li>
+    <li>
+      <b>Inflation</b>: The simulation accounts for <b>inflation</b>, which is
+      the general increase in prices over time. This means your expenses will
+      gradually increase, and your income will also increase to keep up with the
+      rising cost of living.
+    </li>
+    <li>
+      <b>Market Choice</b>: You pick which <b>stock market index</b> your
+      investments track (S&P 500 for the US market or Euro Stoxx 50 for European
+      stocks). The simulation has a set of historical good and bad returns for
+      each of these markets, and it randomly picks one each month to see how
+      your investments perform. This is where the "many possibilities" come in!
+    </li>
+  </ul>
+
+  <h4>2. The Monthly Money Journey (The Simulation Loop)</h4>
+  <p>
+    For each of the 100 possible futures the simulation runs, it performs these
+    steps every single month:
+  </p>
+  <ul>
+    <li>
+      <b>Investment Growth</b>: Your investment fund's value changes based on a
+      randomly selected market return for that month. Sometimes it goes up,
+      sometimes down, reflecting the ups and downs of the stock market.
+    </li>
+    <li>
+      <b>Cash Flow</b>: Your monthly income (which has been adjusted for
+      inflation) comes in, and your monthly expenses (also adjusted for
+      inflation) go out. Any large, one-time payments scheduled for that month
+      are also factored in.
+    </li>
+    <li>
+      <b>Checking Your Cash</b>:
+      <ul>
+        <li>
+          <b>Low Cash Alert!</b> 🚨 The simulation checks if your cash balance
+          drops below a "threshold cash" level you set (e.g., you want to always
+          have at least $5,000 in your bank).
+        </li>
+        <li>
+          <b>Topping Up from Investments</b>: If your cash falls below this
+          threshold, the simulation automatically tries to sell some of your
+          investments to bring your cash back up to the threshold.
+        </li>
+        <li>
+          <b>Capital Gains Tax</b>: If your investments have grown (meaning you
+          have "unrealized gains"), the simulation assumes you'll have to pay a
+          <b>25% tax on those gains</b> when you sell them to top up your cash.
+          It figures out how much *extra* you need to sell to cover both the
+          shortfall and the tax. If your investments haven't grown (or have lost
+          money), there's no tax on the sale.
+        </li>
+      </ul>
+    </li>
+    <li>
+      <b>Tracking Important Moments</b>: Throughout each simulation, the program
+      keeps track of how often your cash drops below your desired threshold or
+      even hits zero.
+    </li>
+  </ul>
+
+  <h4>3. Understanding the Results</h4>
+  <p>
+    After running all 100 scenarios, the simulation gives you valuable insights:
+  </p>
+  <ul>
+    <li>
+      <b>Average Trends</b>: It shows you the <b>median (middle)</b> path for
+      your total wealth (cash + investments), as well as your cash and
+      investments separately. This gives you a general idea of what to expect.
+    </li>
+    <li>
+      <b>Best and Worst Cases</b>: It also provides <b>percentiles</b>, like the
+      5th percentile (a "bad" but not impossible outcome) and the 80th
+      percentile (a "good" outcome). This helps you see the range of
+      possibilities and prepare for less favorable situations.
+    </li>
+    <li>
+      <b>Risk Assessment</b>: Most importantly, it tells you the
+      <b>probability</b> (how likely it is) that your cash will fall below your
+      desired threshold or hit zero at any point in time. This helps you
+      understand your financial risks.
+    </li>
+  </ul>
+
+  <h3>Important Assumptions This Simulation Makes</h3>
+  <p>
+    Like any model, this simulation relies on certain assumptions. It's good to
+    be aware of these so you understand its limitations:
+  </p>
+  <ul>
+    <li>
+      <b>Predictable Market Behavior</b>: The simulation assumes that future
+      stock market returns will behave similarly to a pre-defined set of
+      historical good and bad returns, and the likelihood of each return remains
+      constant. In reality, markets are complex and can surprise us.
+    </li>
+    <li>
+      <b>Constant Inflation</b>: It assumes a single, fixed annual inflation
+      rate that applies consistently throughout the entire simulation period. In
+      the real world, inflation rates can fluctuate.
+    </li>
+    <li>
+      <b>Automatic Income Adjustment for Inflation</b>: It assumes your nominal
+      income (the dollar amount you receive) will automatically increase with
+      inflation to maintain its purchasing power. This might not always happen
+      with all income sources.
+    </li>
+    <li>
+      <b>Large Payments are "Today's Money"</b>: The large payments you specify
+      are treated as fixed amounts in "today's money" and are not adjusted for
+      future inflation.
+    </li>
+    <li>
+      <b>Fixed Capital Gains Tax</b>: It assumes a flat 25% capital gains tax
+      rate that only applies to realized gains when you sell investments to
+      cover cash shortfalls. Real-world tax rules can be more complex and depend
+      on various factors.
+    </li>
+    <li>
+      <b>Immediate Investment of Inflows</b>: Any large cash inflows you specify
+      are immediately added to your investment portfolio.
+    </li>
+    <li>
+      <b>Priority for Cash Threshold</b>: The simulation prioritizes keeping
+      your cash balance above your threshold cash. If needed, it will
+      automatically sell investments to achieve this.
+    </li>
+    <li>
+      <b>No Other Spending Rules</b>: It doesn't include specific spending
+      behaviors, like reducing expenses if money gets tight, or taking on debt.
+      It strictly focuses on managing your existing cash and investments.
+    </li>
+  </ul>
+  <p>
+    By understanding these aspects, you can better interpret the simulation's
+    results and make more informed financial decisions!
   </p>
 </section>
-
 <section id="how-it-works">
   <h2>How It Works</h2>
   <ul>
