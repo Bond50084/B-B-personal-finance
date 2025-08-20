@@ -6,18 +6,22 @@ import numpy as np
 import matplotlib.gridspec as gridspec # Add this import at the top of main_app.py
 from html.parser import HTMLParser
 from simulator_app.simulation_v2_inflation import run_simulation
-
+import traceback
 import matplotlib
 matplotlib.use('Agg') # Use the 'Agg' backend for non-interactive plotting
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib.dates as mdates
-
+import json
+import os
+import tempfile # For creating temporary files/directories
+import uuid 
 import pickle # For serializing Python objects
-import os     # For path manipulation and file cleanup
-import uuid   # To generate unique filenames
-
 from flask import Flask, render_template, request, redirect, url_for, session, send_file
+from plot_generator import plot_to_base64, generate_plot1, generate_plot2, generate_plot3, generate_plot4, generate_plot5, generate_plot6, generate_plot7, generate_plot8
+import plot_generator
+from matplotlib.backends.backend_pdf import PdfPages
+
 
 
 app = Flask(__name__)
@@ -34,7 +38,7 @@ def plot_to_base64(fig):
     return img_base64
 
 # Helper function to apply scientific style to plots
-def apply_scientific_style(ax, plot_params_text=""):
+def apply_scientific_style(ax):
     """Applies a consistent scientific style to a matplotlib axes object."""
     ax.tick_params(axis='both', which='major', labelsize=10, width=1.5, length=6, direction='inout')
     ax.tick_params(axis='both', which='minor', labelsize=8, width=0.75, length=3, direction='inout')
@@ -84,49 +88,81 @@ def generate_summary_text(median_final_wealth, median_final_wealth_after_taxes,
     )
     return summary
 
-def generate_pdf_report(figures_dict, summary_html, output_path):
-    with PdfPages(output_path) as pdf:
-        # Add a title page with the summary
-        fig_summary = plt.figure(figsize=(8.5, 11)) # A4 size
+def generate_pdf_report(
+    output_buffer,
+    simulation_summary_html,
+    t, median_cash, median_port, p5_total, p80_total, median_total, threshold_cash, plot_params_text,
+    cum_first_person, cum_second_person, cum_expense, cum_income, cum_net, text_plot_2_params,
+    df,
+    total_paths, median_final_wealth, percentile_5, percentile_90_wealth, end_date_str,
+    prob_below_threshold, prob_zero_cash
+):
+    with PdfPages(output_buffer) as pdf:
+        # Add a title page
+        fig_title = plt.figure(figsize=(8.27, 11.69), dpi=300) # A4 size
+        ax_title = fig_title.add_subplot(111)
+        ax_title.text(0.5, 0.7, 'Financial Simulation Report',
+                      horizontalalignment='center',
+                      verticalalignment='center',
+                      fontsize=24,
+                      fontweight='bold',
+                      transform=ax_title.transAxes)
+        ax_title.text(0.5, 0.5, f'Generated on: {datetime.now().strftime("%Y-%m-%d %H:%M")}',
+                      horizontalalignment='center',
+                      verticalalignment='center',
+                      fontsize=14,
+                      transform=ax_title.transAxes)
+        ax_title.axis('off')
+        pdf.savefig(fig_title, bbox_inches='tight')
+        plt.close(fig_title)
+
+        # Add the simulation summary (as plain text or a simplified HTML rendering)
+        # For full HTML rendering with styles, you'd need a more advanced PDF library.
+        # Here, we'll try to convert basic HTML to text for simplicity.
+        summary_text = simulation_summary_html.replace('<br>', '\n').replace('<strong>', '').replace('</strong>', '')
+        fig_summary = plt.figure(figsize=(8.27, 11.69), dpi=300) # A4 size
         ax_summary = fig_summary.add_subplot(111)
-        ax_summary.text(0.5, 0.95, "Financial Simulation Report",
-                        fontsize=20, ha='center', va='top', transform=ax_summary.transAxes)
-
-        # Helper to strip HTML tags for plain text in PDF
-        class MLStripper(HTMLParser):
-            def __init__(self):
-                super().__init__()
-                self.reset()
-                self.strict = False
-                self.convert_charrefs = True
-                self.text = []
-
-            def handle_data(self, d):
-                self.text.append(d)
-
-            def get_data(self):
-                return ''.join(self.text)
-
-        def strip_tags_and_format(html_text):
-            s = MLStripper()
-            s.feed(html_text)
-            plain_text = s.get_data()
-            plain_text = plain_text.replace("</p>", "\n\n").replace("</li>", "\n").replace("<ul>", "").replace("<li>", "- ")
-            return plain_text
-
-        plain_text_summary = strip_tags_and_format(summary_html)
-
-        ax_summary.text(0.05, 0.9, plain_text_summary,
-                        fontsize=10, ha='left', va='top', transform=ax_summary.transAxes,
-                        wrap=True) # wrap=True is important for long text
-        ax_summary.axis('off') # Hide axes for text page
+        ax_summary.text(0.05, 0.95, "Simulation Summary:",
+                        horizontalalignment='left', verticalalignment='top',
+                        fontsize=16, fontweight='bold', transform=ax_summary.transAxes)
+        ax_summary.text(0.05, 0.90, summary_text,
+                        horizontalalignment='left', verticalalignment='top',
+                        fontsize=10, wrap=True, transform=ax_summary.transAxes)
+        ax_summary.axis('off')
         pdf.savefig(fig_summary, bbox_inches='tight')
-        plt.close(fig_summary) # Close the figure to free memory
+        plt.close(fig_summary)
 
-        # Add each plot to the PDF
-        for plot_name, fig in figures_dict.items():
-            pdf.savefig(fig, bbox_inches='tight') # Save each figure to a new page
-            plt.close(fig) # Close the figure after saving to PDF
+        # Generate and add plots from the plot_generator module
+        figures_to_pdf = {}
+
+        # Plot 1: Key Financial Trajectories with 5–80%ile Shading
+        figures_to_pdf['plot1'] = plot_generator.generate_plot1(t, median_cash, median_port, p5_total, p80_total, median_total, threshold_cash, plot_params_text)
+
+        # Plot 2: Cumulative Cash Components Over Time
+        figures_to_pdf['plot2'] = plot_generator.generate_plot2(t, cum_first_person, cum_second_person, cum_expense, cum_income, cum_net, threshold_cash, text_plot_2_params)
+
+        # Plot 3: Monthly Cash Flow Components Over Time
+        figures_to_pdf['plot3'] = plot_generator.generate_plot3(df)
+
+        # Plot 4: Histogram of Final Total Wealth
+        figures_to_pdf['plot4'] = plot_generator.generate_plot4(total_paths, median_final_wealth, percentile_5, end_date_str)
+
+        # Plot 5: Probability of Cash Account Reaching Critical Levels Over Time
+        figures_to_pdf['plot5'] = plot_generator.generate_plot5(t, prob_below_threshold, prob_zero_cash, threshold_cash)
+
+        # Plot 6: Median Total Wealth Breakdown: Cash vs. Portfolio
+        figures_to_pdf['plot6'] = plot_generator.generate_plot6(t, median_cash, median_port, median_total)
+
+        # Plot 7: Annual Net Cash Flow
+        figures_to_pdf['plot7'] = plot_generator.generate_plot7(df)
+
+        # Plot 8: Cumulative Distribution of Final Total Wealth
+        figures_to_pdf['plot8'] = plot_generator.generate_plot8(total_paths, median_final_wealth, percentile_5, percentile_90_wealth, end_date_str)
+
+        # Add all generated figures to the PDF
+        for fig_key in sorted(figures_to_pdf.keys()): # Ensure plots are added in order
+            pdf.savefig(figures_to_pdf[fig_key], bbox_inches='tight')
+            plt.close(figures_to_pdf[fig_key]) # Close the f
 
 
 
@@ -230,9 +266,6 @@ def run():
         )
 
 
-
-
-        # Text to be added to plots
         plot_params_text = (
             f"Initial Cash: €{initial_cash:,.0f}\n"
             f"Initial Portfolio: €{initial_portfolio_value:,.0f}\n"
@@ -244,11 +277,12 @@ def run():
         )
         text_plot_2 = (f"Annual Inflation: {inflation_rate:.1%}\n"
             f"Initial Monthly Expenses: €{inital_monthly_expenses_total:,.0f}\n")
-        from flask import session
-        session['simulation_results'] = {
+        #from flask import session
+        simulation_data = {
             't': t.tolist(), # Convert numpy array to list
             'median_total': median_total.tolist(),
             'df_data': df.to_dict('records'), # Convert DataFrame to list of dicts
+            'df_index_dates': df.index.strftime('%Y-%m-%d').tolist(),
             'p5_total': p5_total.tolist(),
             'p80_total': p80_total.tolist(),
             'prob_below_threshold': prob_below_threshold.tolist(),
@@ -282,17 +316,56 @@ def run():
             'plot_params_text': plot_params_text,
             'text_plot_2_params': text_plot_2,
             'initial_portfolio_value': initial_portfolio_value, # Also store calculated values used in text
+            'percentile_5': percentile_5,
         }
+         # Create a temporary file to store results
+        temp_dir = tempfile.gettempdir() # Get the system's temporary directory
+        unique_filename = f"simulation_results_{uuid.uuid4()}.json"
+        temp_file_path = os.path.join(temp_dir, unique_filename)
 
+        with open(temp_file_path, 'w') as f:
+            json.dump(simulation_data, f)
+
+        # Store the path to the temporary file in the session
+        session['simulation_results_file'] = temp_file_path
+        
+    
         plots = {}
 
         # --- Plot 1: Key Financial Trajectories with 5–80%ile Shading ---
         #fig1, ax1 = plt.subplots(figsize=(10, 6))
         t_years = t / 12.0
         
+        fig1 = generate_plot1(t, median_cash, median_port, p5_total, p80_total, median_total, threshold_cash, plot_params_text)
+        plots['plot1'] = plot_to_base64(fig1)
         
+        fig2 = generate_plot2(t, cum_first_person, cum_second_person, cum_expense, cum_income, cum_net, threshold_cash, text_plot_2)
+        plots['plot2'] = plot_to_base64(fig2)
         
+        fig3 = generate_plot3(df)
+        plots['plot3'] = plot_to_base64(fig3)
+
+        # Plot 4: Histogram of Final Total Wealth
+        fig4 = generate_plot4(total_paths, median_final_wealth, percentile_5, end_date_str)
+        plots['plot4'] = plot_to_base64(fig4)
+
+        # Plot 5: Probability of Cash Account Reaching Critical Levels Over Time
+        fig5 = generate_plot5(t, prob_below_threshold, prob_zero_cash, threshold_cash)
+        plots['plot5'] = plot_to_base64(fig5)
+
+        # Plot 6: Median Total Wealth Breakdown: Cash vs. Portfolio
+        fig6 = generate_plot6(t, median_cash, median_port, median_total)
+        plots['plot6'] = plot_to_base64(fig6)
+
+        # Plot 7: Annual Net Cash Flow
+        fig7 = generate_plot7(df)
+        plots['plot7'] = plot_to_base64(fig7)
+
+        # Plot 8: Cumulative Distribution of Final Total Wealth
+        fig8 = generate_plot8(total_paths, median_final_wealth, percentile_5, percentile_90_wealth, end_date_str)
+        plots['plot8'] = plot_to_base64(fig8)
         
+        '''
         fig1 = plt.figure(figsize=(10, 10)) # Increase figure height to accommodate text
         gs1 = gridspec.GridSpec(2, 1, height_ratios=[4, 1]) # 4 parts for plot, 1 for text
         ax1 = fig1.add_subplot(gs1[0, 0]) # Main plot
@@ -315,7 +388,7 @@ def run():
         ax1_text.axis('off') # Hide the axes for the text subplot
         fig1.tight_layout(rect=[0, 0.03, 1, 1]) # Adjust layout to prevent o
         plots['plot1'] = plot_to_base64(fig1)
-        '''
+        
         # --- Plot 2: Cumulative Cash Components Over Time ---
         fig2, ax2 = plt.subplots(figsize=(10, 6))
         ax2.plot(t, cum_first_person, label='Cumulative First Person Income', linestyle=':', marker='o', markersize=3, color='darkgreen')
@@ -331,7 +404,7 @@ def run():
         ax2.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True)
         apply_scientific_style(ax2, plot_params_text)
         plots['plot2'] = plot_to_base64(fig2)
-        '''
+        
         # --- Plot 2: Cumulative Cash Components Over Time ---
         fig2 = plt.figure(figsize=(10, 10)) # Increase figure height for text
         gs2 = gridspec.GridSpec(2, 1, height_ratios=[4, 1]) # 4 parts for plot, 1 for text
@@ -376,12 +449,12 @@ def run():
         ax3.set_xlabel('Date')
         ax3.set_ylabel('Amount (€ / month)')
         ax3.set_title('Monthly Cash Flow Components Over Time')
-        apply_scientific_style(ax3, plot_params_text)
+        apply_scientific_style(ax3)
         ax3.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
         ax3.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True)
         fig3.autofmt_xdate()
         plots['plot3'] = plot_to_base64(fig3)
-
+        
         # --- Plot 4: Histogram of Final Total Wealth ---
         fig4, ax4 = plt.subplots(figsize=(10, 10))
         final = total_paths[:, -1]
@@ -392,7 +465,7 @@ def run():
         ax4.set_ylabel('Probability Density')
         ax4.set_title(f'Histogram of Final Total Wealth ({df.index[-1].strftime("%b %Y")})')
         ax4.legend(loc='upper right', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        apply_scientific_style(ax4, plot_params_text)
+        apply_scientific_style(ax4)
         plots['plot4'] = plot_to_base64(fig4)
 
         # --- Plot 5: Probability of Cash Account Reaching Critical Levels Over Time ---
@@ -404,9 +477,9 @@ def run():
         ax5.set_title('Probability of Cash Account Reaching Critical Levels Over Time')
         ax5.set_ylim(0, 1)
         ax5.legend(loc='upper right', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        apply_scientific_style(ax5, plot_params_text)
+        apply_scientific_style(ax5)
         plots['plot5'] = plot_to_base64(fig5) # This was plot5 in the original, but results.html refers to it as plot3, so I will map it accordingly
-
+        
         # --- Plot 6: Median Total Wealth Breakdown: Cash vs. Portfolio (Stacked Area Plot) ---
         fig6, ax6 = plt.subplots(figsize=( 10, 10))
         ax6.stackplot(t, median_cash, median_port, labels=['Median Cash Account', 'Median Portfolio Value'], alpha=0.8, colors=['lightgreen', 'lightblue'])
@@ -435,7 +508,7 @@ def run():
         ax7.set_title('Annual Net Cash Flow (Income - Expenses + Large Payments)')
         ax7.tick_params(axis='x', rotation=45) # Removed ha='right'
         ax7.legend(loc='upper right', fontsize=9, frameon=True, shadow=True, fancybox=True) 
-        apply_scientific_style(ax7, plot_params_text)
+        apply_scientific_style(ax7)
         for bar in bars:
             yval = bar.get_height()
             # Adjust y-position slightly to move text just above/below the bar
@@ -450,7 +523,7 @@ def run():
                      ha=ha, va=va, fontsize=8, color='black', rotation=rotation_angle) # Add rotation
             
         plots['plot7'] = plot_to_base64(fig7)
-
+        
         fig8, ax8 = plt.subplots(figsize=(10, 6))
         final_wealth_values = total_paths[:, -1]
         sorted_final_wealth = np.sort(final_wealth_values)
@@ -473,6 +546,9 @@ def run():
         apply_scientific_style(ax8) # Apply the consistent style
         plots['plot8'] = plot_to_base64(fig8) # Assign to 'plot8'
         #return render_template('results.html', plots=plots, final_wealth=f"€{median_final_wealth:,.0f}", final_wealth_after_tax = f"€{median_final_wealth_after_taxes:,.0f}")
+        '''
+        
+        
         return render_template(
             'results.html', 
             plots=plots, 
@@ -487,225 +563,106 @@ def run():
         return render_template('simulator_parameters.html', error=f"Input Error: {e}")
     except Exception as e:
         # Handle any other unexpected errors
-        return render_template('simulator_parameters.html', error=f"An unexpected error occurred: {e}")
-from flask import session # Make sure this is imported at the top
+        
+        #return render_template('simulator_parameters.html', error=f"An unexpected error occurred: {e}")
+        return render_template('simulator_parameters.html', error=f"An unexpected error occurred: {e}<br><pre>{traceback.format_exc()}</pre>")
+
 
 @app.route('/simulator/download_report', methods=['GET'])
 def download_report():
     """
-    Generates and serves the PDF report based on simulation parameters stored in the session.
+    Initiates the download of a PDF report based on the last simulation results
+    stored temporarily on the server's file system.
     """
-    from flask import session
-    session_results = session.get('simulation_results')
+    temp_file_path = session.get('simulation_results_file')
 
-    if not session_results:
-        # User tried to access download without running simulation or session expired
-        # Redirect them back to the simulator or an error page
-        return redirect(url_for('simulator_index', error="Please run a simulation first to generate a report."))
+    # If no file path in session or file does not exist, redirect with an error
+    if not temp_file_path or not os.path.exists(temp_file_path):
+        return redirect(url_for('simulator_index', error="No simulation results found. Please run a simulation first."))
+
+    simulation_results = None
+    pdf_output_buffer = io.BytesIO() # Create an in-memory buffer for the PDF
 
     try:
-        # Reconstruct data from session and convert back to numpy/pandas where needed
-        t = np.array(session_results['t'])
-        median_total = np.array(session_results['median_total'])
+        # Load the simulation results from the temporary JSON file
+        with open(temp_file_path, 'r') as f:
+            simulation_results = json.load(f)
 
-        df = pd.DataFrame(session_results['df_data'])
+        # Reconstruct data from loaded JSON into NumPy arrays and Pandas DataFrames
+        t = np.array(simulation_results['t'])
+        median_total = np.array(simulation_results['median_total'])
+        df = pd.DataFrame(simulation_results['df_data'])
         # IMPORTANT: Reconstruct the datetime index for the DataFrame
-        df.index = pd.to_datetime(session_results['df_index_dates'])
+        df.index = pd.to_datetime(simulation_results['df_index_dates'])
 
+        p5_total = np.array(simulation_results['p5_total'])
+        p80_total = np.array(simulation_results['p80_total'])
+        prob_below_threshold = np.array(simulation_results['prob_below_threshold'])
+        prob_zero_cash = np.array(simulation_results['prob_zero_cash'])
+        cum_income = np.array(simulation_results['cum_income'])
+        cum_expense = np.array(simulation_results['cum_expense'])
+        cum_net = np.array(simulation_results['cum_net'])
+        cum_first_person = np.array(simulation_results['cum_first_person'])
+        cum_second_person = np.array(simulation_results['cum_second_person'])
+        median_cash = np.array(simulation_results['median_cash'])
+        median_port = np.array(simulation_results['median_port'])
+        total_paths = np.array(simulation_results['total_paths'])
+        cum_large_payments = np.array(simulation_results['cum_large_payments'])
 
-        p5_total = np.array(session_results['p5_total'])
-        p80_total = np.array(session_results['p80_total'])
-        prob_below_threshold = np.array(session_results['prob_below_threshold'])
-        prob_zero_cash = np.array(session_results['prob_zero_cash'])
-        cum_income = np.array(session_results['cum_income'])
-        cum_expense = np.array(session_results['cum_expense'])
-        cum_net = np.array(session_results['cum_net'])
-        cum_first_person = np.array(session_results['cum_first_person'])
-        cum_second_person = np.array(session_results['cum_second_person'])
-        median_cash = np.array(session_results['median_cash'])
-        median_port = np.array(session_results['median_port'])
-        total_paths = np.array(session_results['total_paths'])
-        cum_large_payments = np.array(session_results['cum_large_payments'])
+        # Retrieve direct values for summary and plot text
+        median_final_wealth = simulation_results['median_final_wealth']
+        median_final_wealth_after_taxes = simulation_results['median_final_wealth_after_taxes']
+        median_final_wealth_today_s_power = simulation_results['median_final_wealth_today_s_power']
+        median_final_wealth_today_s_power_before_taxes = simulation_results['median_final_wealth_today_s_power_before_taxes']
+        prob_zero_cash_final = simulation_results['prob_zero_cash_final']
+        percentile_90_wealth = simulation_results['percentile_90_wealth']
+        simulation_summary_html = simulation_results['simulation_summary_html'] # Use the pre-generated HTML summary
+        plot_params_text = simulation_results['plot_params_text']
+        text_plot_2_params = simulation_results['text_plot_2_params']
+        threshold_cash = simulation_results['threshold_cash']
+        percentile_5 = simulation_results['percentile_5']
+        start_date_str = simulation_results['start_date_str'] # Needed for date recreation if used in plots
+        end_date_str = simulation_results['end_date_str'] # Needed for plot titles
 
-        # Retrieve direct values for summary and text
-        median_final_wealth = session_results['median_final_wealth']
-        median_final_wealth_after_taxes = session_results['median_final_wealth_after_taxes']
-        median_final_wealth_today_s_power = session_results['median_final_wealth_today_s_power']
-        median_final_wealth_today_s_power_before_taxes = session_results['median_final_wealth_today_s_power_before_taxes']
-        prob_zero_cash_final = session_results['prob_zero_cash_final']
-        percentile_90_wealth = session_results['percentile_90_wealth']
-        simulation_summary_text = session_results['simulation_summary_html'] # Use the pre-generated HTML summary
-        plot_params_text = session_results['plot_params_text']
-        text_plot_2_params = session_results['text_plot_2_params']
-        threshold_cash = session_results['threshold_cash']
-        percentile_5 = session_results['percentile_5'] # Ensure this is stored in session
-        start_date_str = session_results['start_date_str'] # Needed for date recreation
-        end_date_str = session_results['end_date_str'] # Needed for plot titles
+        # Call the refactored PDF generation function
+        generate_pdf_report(
+            pdf_output_buffer,
+            simulation_summary_html,
+            t, median_cash, median_port, p5_total, p80_total, median_total, threshold_cash, plot_params_text,
+            cum_first_person, cum_second_person, cum_expense, cum_income, cum_net, text_plot_2_params,
+            df,
+            total_paths, median_final_wealth, percentile_5, percentile_90_wealth, end_date_str,
+            prob_below_threshold, prob_zero_cash
+        )
+        pdf_output_buffer.seek(0) # Rewind the buffer to the beginning for sending
 
-
-        # --- Re-generate Figures from retrieved data for PDF generation ---
-        figures_to_pdf = {}
-
-        # Plot 1
-        fig1 = plt.figure(figsize=(10, 10))
-        gs1 = gridspec.GridSpec(2, 1, height_ratios=[4, 1])
-        ax1 = fig1.add_subplot(gs1[0, 0])
-        ax1_text = fig1.add_subplot(gs1[1, 0])
-        t_years = t / 12.0
-        ax1.plot(t_years, median_cash, label='Median Cash Account', linestyle='--', marker='^', markersize=4, color='green')
-        ax1.plot(t_years, median_port, label='Median Portfolio Value', linestyle='-', marker='D', markersize=3, color='purple')
-        ax1.fill_between(t_years, p5_total, p80_total, color='orange', alpha=0.3, label='5–80th %ile Total Wealth')
-        ax1.plot(t_years, median_total, label='Median Total Wealth', linewidth=2.5, color='orange', linestyle='-')
-        ax1.axhline(threshold_cash, color='crimson', linestyle='--', linewidth=1.5, label=f'Cash Threshold €{threshold_cash:,.0f}')
-        ax1.set_xlabel('Years since Start Date')
-        ax1.set_ylabel('Amount (€)')
-        ax1.set_title('Key Financial Trajectories with 5–80%ile Shading')
-        apply_scientific_style(ax1)
-        ax1.xaxis.set_major_locator(ticker.MultipleLocator(5))
-        ax1.xaxis.set_minor_locator(ticker.MultipleLocator(1))
-        ax1.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x)}y'))
-        ax1.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        ax1_text.text(0.0, 1.0, plot_params_text, transform=ax1_text.transAxes,
-                 fontsize=9, verticalalignment='top', bbox=dict(boxstyle='round,pad=0.5', fc='white', alpha=0.6))
-        ax1_text.axis('off')
-        fig1.tight_layout(rect=[0, 0.03, 1, 1])
-        figures_to_pdf['plot1'] = fig1
-
-
-        # Plot 2
-        fig2 = plt.figure(figsize=(10, 10))
-        gs2 = gridspec.GridSpec(2, 1, height_ratios=[4, 1])
-        ax2 = fig2.add_subplot(gs2[0, 0])
-        ax2_text = fig2.add_subplot(gs2[1, 0])
-        marker_interval = 6
-        ax2.plot(t[::marker_interval], cum_first_person[::marker_interval], label='Cumulative First Person Income', linestyle=':', marker='o', markersize=4, color='darkgreen', markevery=marker_interval)
-        ax2.plot(t[::marker_interval], cum_second_person[::marker_interval], label='Cumulative Second Person Income', linestyle='--', marker='s', markersize=4, color='darkblue', markevery=marker_interval)
-        ax2.plot(t, cum_expense, label='Cumulative Expenses', linestyle='-', color='firebrick', linewidth=1.5)
-        ax2.plot(t, cum_income, label='Cumulative Total Income', linestyle='-', linewidth=2, color='teal')
-        ax2.plot(t, cum_net, label='Cumulative Net Cash', linewidth=3.5, color='black', linestyle='-')
-        ax2.axhline(threshold_cash, color='red', linestyle='--', linewidth=1.5, label=f'Cash Threshold €{threshold_cash:,.0f}')
-        ax2.set_xlabel('Months since Start Date')
-        ax2.set_ylabel('Amount (€)')
-        ax2.set_title('Cumulative Cash Components Over Time')
-        ax2.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        apply_scientific_style(ax2)
-        ax2_text.text(0.0, 1.0, text_plot_2_params, transform=ax2_text.transAxes,
-                    fontsize=9, verticalalignment='top', bbox=dict(boxstyle='round,pad=0.5', fc='white', alpha=0.6))
-        ax2_text.axis('off')
-        fig2.tight_layout(rect=[0, 0.03, 1, 1])
-        figures_to_pdf['plot2'] = fig2
-
-        # Plot 3
-        fig3_obj, ax3 = plt.subplots(figsize=(10, 6))
-        ax3.plot(df.index, df['expenses'], label='Total Monthly Expenses', linestyle='dashed', color='red', marker='v', markersize=2, alpha=0.7)
-        ax3.plot(df.index, df['income'], label='Total Monthly Income', linestyle='dashed', color='green', marker='^', markersize=2, alpha=0.7)
-        ax3.plot(df.index, df['net_cash'], label='Monthly Net Cash', linestyle='solid', color='blue', linewidth=1.5)
-        ax3.set_xlabel('Date')
-        ax3.set_ylabel('Amount (€ / month)')
-        ax3.set_title('Monthly Cash Flow Components Over Time')
-        apply_scientific_style(ax3)
-        ax3.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-        ax3.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        fig3_obj.autofmt_xdate()
-        figures_to_pdf['plot3'] = fig3_obj
-
-        # Plot 4
-        fig4, ax4 = plt.subplots(figsize=(10, 6))
-        final = total_paths[:, -1]
-        ax4.hist(final, bins=30, density=True, alpha=0.8, color='skyblue', edgecolor='black')
-        ax4.axvline(median_final_wealth, color='red', linestyle='--', label=f'Median Final Wealth: €{median_final_wealth:,.0f}')
-        ax4.axvline(percentile_5, color = 'black', label= f'5th Percentile: €{percentile_5:,.0f}', linestyle='--')
-        ax4.set_xlabel('Final Total Wealth (€)')
-        ax4.set_ylabel('Probability Density')
-        end_date_for_title = datetime.strptime(end_date_str, '%Y-%m-%d').strftime('%b %Y')
-        ax4.set_title(f'Histogram of Final Total Wealth ({end_date_for_title})')
-        ax4.legend(loc='upper right', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        apply_scientific_style(ax4)
-        figures_to_pdf['plot4'] = fig4
-
-        # Plot 5
-        fig5, ax5 = plt.subplots(figsize=(10, 6))
-        ax5.plot(t, prob_below_threshold, label=f'Probability Cash < €{threshold_cash:,.0f}', color='blue', linewidth=2, marker='.')
-        ax5.plot(t, prob_zero_cash, label='Probability Cash <= €0', color='red', linestyle='--', linewidth=2, marker='x')
-        ax5.set_xlabel('Months since Start Date')
-        ax5.set_ylabel('Probability')
-        ax5.set_title('Probability of Cash Account Reaching Critical Levels Over Time')
-        ax5.set_ylim(0, 1)
-        ax5.legend(loc='upper right', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        apply_scientific_style(ax5)
-        figures_to_pdf['plot5'] = fig5
-
-        # Plot 6
-        fig6, ax6 = plt.subplots(figsize=( 10, 6))
-        ax6.stackplot(t, median_cash, median_port, labels=['Median Cash Account', 'Median Portfolio Value'], alpha=0.8, colors=['lightgreen', 'lightblue'])
-        ax6.plot(t, median_total, color='black', linestyle='--', linewidth=2, label='Median Total Wealth')
-        ax6.set_xlabel('Months since Start Date')
-        ax6.set_ylabel('Amount (€)')
-        ax6.set_title('Median Total Wealth Breakdown: Cash vs. Portfolio')
-        ax6.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        apply_scientific_style(ax6)
-        figures_to_pdf['plot6'] = fig6
-
-        # Plot 7
-        fig7, ax7 = plt.subplots(figsize=(10, 6))
-        df_annual = df.resample('Y').sum(numeric_only=True) # Use the correctly reconstructed df
-        annual_net_cash = df_annual['net_cash']
-        annual_labels = [str(x.year) for x in df_annual.index]
-        bars = ax7.bar(annual_labels, annual_net_cash, color=['skyblue' if x >= 0 else 'lightcoral' for x in annual_net_cash], edgecolor='black', linewidth=0.7)
-        ax7.axhline(0, color='red', linestyle='--', linewidth=1.5)
-        ax7.set_xlabel('Year')
-        ax7.set_ylabel('Annual Net Cash Flow (€)')
-        ax7.set_title('Annual Net Cash Flow (Income - Expenses + Large Payments)')
-        ax7.tick_params(axis='x', rotation=45)
-        apply_scientific_style(ax7)
-        for bar in bars:
-            yval = bar.get_height()
-            text_y_offset = 5000
-            ha = 'center'
-            va = 'bottom' if yval >= 0 else 'top'
-            rotation_angle = 90
-            ax7.text(bar.get_x() + bar.get_width()/2, yval + (text_y_offset if yval >= 0 else -text_y_offset), f'€{yval:,.0f}',
-                     ha=ha, va=va, fontsize=8, color='black', rotation=rotation_angle)
-        figures_to_pdf['plot7'] = fig7
-
-        # Plot 8 (CDF)
-        fig8, ax8 = plt.subplots(figsize=(10, 6))
-        final_wealth_values = total_paths[:, -1]
-        sorted_final_wealth = np.sort(final_wealth_values)
-        cdf = np.arange(1, len(sorted_final_wealth) + 1) / len(sorted_final_wealth)
-
-        ax8.plot(sorted_final_wealth, cdf, color='darkgreen', linewidth=2)
-        ax8.set_xlabel('Final Total Wealth (€)')
-        ax8.set_ylabel('Cumulative Probability')
-        ax8.set_title(f'Cumulative Distribution of Final Total Wealth ({end_date_for_title})')
-        ax8.grid(True, which='major', linestyle='-', linewidth='0.7', color='lightgray', alpha=0.8)
-        ax8.grid(True, which='minor', linestyle=':', linewidth='0.5', color='lightgray', alpha=0.5)
-        ax8.set_ylim(0, 1)
-
-        ax8.axvline(median_final_wealth, color='red', linestyle='--', label=f'Median: €{median_final_wealth:,.0f}')
-        ax8.axvline(percentile_5, color='orange', linestyle='--', label=f'5th Percentile: €{percentile_5:,.0f}')
-        ax8.axvline(percentile_90_wealth, color='blue', linestyle='--', label=f'90th Percentile: €{percentile_90_wealth:,.0f}')
-        ax8.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True)
-
-        apply_scientific_style(ax8)
-        figures_to_pdf['plot8'] = fig8
-
-
-        # Generate the PDF report
-        pdf_file_path = "/tmp/simulation_report.pdf" # Use /tmp for Cloud Run (writable temp directory)
-        generate_pdf_report(figures_to_pdf, simulation_summary_text, pdf_file_path)
-
-        # IMPORTANT: Only clear session if you're certain it's the final action
-        # For now, let's remove it to allow subsequent downloads or viewing results page again
-        # session.pop('simulation_results', None) # Comment this out for now for easier testing
-
-        # Send the generated PDF file
-        return send_file(pdf_file_path, as_attachment=True, download_name="financial_simulation_report.pdf", mimetype='application/pdf')
+        # Send the file to the user
+        response = send_file(
+            pdf_output_buffer,
+            as_attachment=True,
+            download_name="financial_simulation_report.pdf",
+            mimetype='application/pdf'
+        )
+        return response
 
     except Exception as e:
-        import traceback
-        # Return a plain text error, not HTML code, when PDF generation fails.
-        return f"Error generating PDF from session data: {e}<br><pre>{traceback.format_exc()}</pre>", 500
+        # Log the error for debugging
+        print(f"Error generating PDF report: {e}")
+        print(traceback.format_exc()) # Print the full traceback
+
+        # Return a plain text error message to the user
+        return f"Error generating your report. Please try running the simulation again. Details: {e}", 500
+    finally:
+        # Clean up: remove the temporary file and clear the session entry
+        if temp_file_path and os.path.exists(temp_file_path):
+            try:
+                os.remove(temp_file_path)
+            except OSError as e:
+                print(f"Error deleting temporary file {temp_file_path}: {e}")
+        if 'simulation_results_file' in session:
+            session.pop('simulation_results_file', None)
+
+
 
 if __name__ == '__main__':
     # This block is for local development. In a Canvas environment, the app is run differently.

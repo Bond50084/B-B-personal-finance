@@ -66,8 +66,11 @@
               >Simulator</a
             >
 
-            <a class="nav-link fw-bold py-1 px-0" href="#">Products</a>
-
+            <a
+              class="nav-link fw-bold py-1 px-0 {% if active_page == 'contact' %}active{% endif %}"
+              href="{{ url_for('main_index') }}"
+              >Products</a
+            >
             <a
               class="nav-link fw-bold py-1 px-0 {% if active_page == 'contact' %}active{% endif %}"
               href="{{ url_for('contact') }}"
