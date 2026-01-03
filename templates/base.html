@@ -30,7 +30,13 @@
     />
     {% block head_extra %}{% endblock %}
   </head>
-
+  <style>
+    /* Macht den Container auf ALLEN Seiten breit */
+    .cover-container {
+      max-width: 1200px !important;
+      width: 95%;
+    }
+  </style>
   <body
     class="d-flex text-center text-bg-dark {% block body_class %}{% endblock %}"
   >
@@ -56,8 +62,14 @@
             <a
               class="nav-link fw-bold py-1 px-0 {% if active_page == 'home' %}active{% endif %}"
               aria-current="page"
-              href="{{ url_for('main_index') }}"
+              href="{{ url_for('landing') }}"
               >Home</a
+            >
+
+            <a
+              class="nav-link fw-bold py-1 px-0 {% if active_page == 'products' %}active{% endif %}"
+              href="{{ url_for('main_index') }}"
+              >Products</a
             >
 
             <a
@@ -66,11 +78,6 @@
               >Simulator</a
             >
 
-            <a
-              class="nav-link fw-bold py-1 px-0 {% if active_page == 'contact' %}active{% endif %}"
-              href="{{ url_for('main_index') }}"
-              >Products</a
-            >
             <a
               class="nav-link fw-bold py-1 px-0 {% if active_page == 'contact' %}active{% endif %}"
               href="{{ url_for('contact') }}"

@@ -168,8 +168,15 @@ def generate_pdf_report(
 
 # Define route for the main website's index page
 @app.route('/')
+def landing():
+    # This renders the new "Startup" introduction page
+    return render_template('landing.html', active_page='home')
+
+# --- The Old Main Page (Now "Products" or "Dashboard") ---
+@app.route('/products')
 def main_index():
-    return render_template('main_index.html', active_page='home')
+    # This renders your existing product overview
+    return render_template('main_index.html', active_page='products')
 
 @app.route('/simulator')
 def simulator_index():

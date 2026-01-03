@@ -1,43 +1,105 @@
-{% extends "base.html" %} {% block title %}Behrens & Behrens{% endblock %} {%
-block body_class %}main-page{% endblock %} {% block head_extra %} {# Assuming
-cover.css is already linked in base.html or here #} {# If not already linked in
-base.html, add it here: #} {#
-<link
-  rel="stylesheet"
-  href="{{ url_for('static', filename='site/cover.css') }}"
-/>
-#} {% endblock %} {% block content %}
-<h2 class="mb-4 text-white">Our Products:</h2>
+{% extends "base.html" %} {% block title %}Behrens & Behrens • Products{%
+endblock %} {% block body_class %}main-page{% endblock %} {% block head_extra %}
+<style>
+  /* Custom styles to make the product cards look better */
+  .product-icon {
+    font-size: 4rem; /* Big emojis */
+    margin-bottom: 1rem;
+    display: block;
+  }
 
-<div class="row text-center options-frame">
-  <div class="col">
-    <h1>Financial Freedom Awaits</h1>
-    <p class="lead">
-      Plan your future with our comprehensive <b>financial simulation tool</b>.
-      Understand your cash flow, investments, and expenses to achieve your
-      goals.
-    </p>
-    <p class="lead">
-      <a
-        href="{{ url_for('simulator_index') }}"
-        class="btn btn-lg btn-light fw-bold border-white bg-white"
-        >Free Financial Simulation</a
-      >
-    </p>
+  .product-card {
+    transition: transform 0.3s ease; /* Smooth hover lift */
+    height: 100%; /* Make all cards same height */
+    padding: 1rem;
+  }
+
+  .product-card:hover {
+    transform: translateY(-10px); /* Move up slightly on hover */
+  }
+
+  /* Make the text slightly smaller so it fits 4-in-a-row nicely */
+  .product-desc {
+    font-size: 1rem;
+    min-height: 80px; /* Aligns buttons nicely */
+  }
+</style>
+{% endblock %} {% block content %}
+<h2 class="mb-5 text-white">Our Product Suite:</h2>
+
+<div class="row text-center options-frame gx-4 gy-5">
+  <div class="col-lg-3 col-md-6">
+    <div class="product-card">
+      <span class="product-icon">🔮</span>
+      <h3>Simulator</h3>
+      <p class="product-desc text-white-50">
+        Plan your future with our comprehensive simulation tool. Analyze cash
+        flow and prepare for thousands of market scenarios.
+      </p>
+      <p>
+        <a
+          href="{{ url_for('simulator_index') }}"
+          class="btn btn-light fw-bold w-100 rounded-pill"
+          >Start Simulation</a
+        >
+      </p>
+    </div>
   </div>
-  <div class="col">
-    <h1>Investment fund</h1>
-    <p class="lead">
-      Invest you money directly in our first class wikifolio fund. Actively
-      managed to archieve top performance.<br /><br />
-    </p>
-    <p class="lead">
-      <a
-        href="https://www.wikifolio.com/de/de/w/wfpaailead"
-        class="btn btn-lg btn-light fw-bold border-white bg-white"
-        >Invest now</a
-      >
-    </p>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="product-card">
+      <span class="product-icon">📈</span>
+      <h3>The Fund</h3>
+      <p class="product-desc text-white-50">
+        Invest directly in our high-performance Wikifolio. Actively managed by
+        experts to maximize returns while managing risk.
+      </p>
+      <p>
+        <a
+          href="https://www.wikifolio.com/de/de/w/wfpaailead"
+          class="btn btn-light fw-bold w-100 rounded-pill"
+          >Invest Now</a
+        >
+      </p>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="product-card">
+      <span class="product-icon">🇪🇺</span>
+      <h3>Förder-Match</h3>
+      <p class="product-desc text-white-50">
+        Automated matching for public funding. We scan EU & German databases to
+        find the perfect grants for your business profile.
+      </p>
+      <p>
+        <button
+          class="btn btn-outline-light fw-bold w-100 rounded-pill"
+          disabled
+        >
+          Coming Soon
+        </button>
+      </p>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="product-card">
+      <span class="product-icon">🌱</span>
+      <h3>ESG Reader</h3>
+      <p class="product-desc text-white-50">
+        Sustainability reporting made simple. Automate the collection and
+        preparation of complex ESG data for effortless compliance.
+      </p>
+      <p>
+        <button
+          class="btn btn-outline-light fw-bold w-100 rounded-pill"
+          disabled
+        >
+          Coming Soon
+        </button>
+      </p>
+    </div>
   </div>
 </div>
 {% endblock %}
