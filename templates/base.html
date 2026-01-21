@@ -31,72 +31,133 @@
     {% block head_extra %}{% endblock %}
   </head>
   <style>
-    /* Macht den Container auf ALLEN Seiten breit */
+    .header-blur-edge {
+      /* WICHTIG: Damit klebt sie immer oben */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1050; /* Muss höher sein als alles andere (Bootstrap nutzt oft 1000+) */
+
+      /* OPTIK (wie vorher) */
+      background: linear-gradient(
+        180deg,
+        rgba(33, 37, 41, 1) 0%,
+        rgba(33, 37, 41, 0.6) 100%
+      );
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box_shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+      /* Abstände */
+      padding: 0.75rem 0; /* Etwas flacher, da sie immer da ist */
+      border-radius: 0; /* Eckig, da sie den Rand berührt */
+    }
+
+    /* Damit der Inhalt der Navbar nicht ganz am Rand klebt,
+       sondern schön mittig mit dem Rest der Seite fluchtet */
+    .header-inner-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+
+      /* HIER IST DIE ÄNDERUNG: */
+      display: flex;
+      flex-direction: column; /* Elemente übereinander stapeln */
+      align-items: center; /* Alles mittig zentrieren */
+      justify-content: center;
+    }
+    .header-inner-container h3 {
+      margin-bottom: 0.2rem; /* Kleiner Abstand nach unten */
+    }
+
     .cover-container {
       max-width: 1200px !important;
       width: 95%;
+      /* WICHTIG: Da die Leiste jetzt über dem Bild schwebt, brauchen wir hier keinen Abstand mehr nach oben,
+         da dein Landing-Page Bild ja unter der Leiste durchgehen soll. */
     }
   </style>
   <body
     class="d-flex text-center text-bg-dark {% block body_class %}{% endblock %}"
   >
+    <header class="header-blur-edge">
+      <div class="header-inner-container">
+        <h3 class="mb-0">
+          <img
+            src="{{ url_for('static', filename='assets/brand/logo-1.png') }}"
+            alt="Behrens & Behrens"
+            height="60"
+            class="mx-1 rounded"
+          />
+          <img
+            src="{{ url_for('static', filename='assets/brand/logo-2.png') }}"
+            alt="Behrens & Behrens"
+            height="60"
+            class="mx-1 rounded"
+          />
+        </h3>
+
+        <nav class="nav nav-masthead justify-content-center">
+          <a
+            class="nav-link fw-bold py-1 px-2 {% if active_page == 'home' %}active{% endif %}"
+            href="{{ url_for('landing') }}"
+            >Home</a
+          >
+
+          <a
+            class="nav-link fw-bold py-1 px-2 {% if active_page == 'products' %}active{% endif %}"
+            href="{{ url_for('main_index') }}"
+            >Products</a
+          >
+
+          <a
+            class="nav-link fw-bold py-1 px-2 {% if active_page == 'simulator' %}active{% endif %}"
+            href="{{ url_for('simulator_index') }}"
+            >Simulator</a
+          >
+
+          <a
+            class="nav-link fw-bold py-1 px-2 {% if active_page == 'contact' %}active{% endif %}"
+            href="{{ url_for('contact') }}"
+            >Contact</a
+          >
+
+          <span class="mx-2 text-white-50 align-self-center">|</span>
+
+          {% if current_user.is_authenticated %}
+          <a
+            class="nav-link fw-bold py-1 px-2"
+            href="{{ url_for('user_home') }}"
+            >My Account</a
+          >
+
+          <a class="nav-link fw-bold py-1 px-2" href="{{ url_for('logout') }}"
+            >Logout</a
+          >
+          {% else %}
+          <a class="nav-link fw-bold py-1 px-2" href="{{ url_for('login') }}"
+            >Login</a
+          >
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+
     <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-      <header class="mb-auto">
-        <div>
-          <h3 class="float-md-start mb-0">
-            <img
-              src="{{ url_for('static', filename='assets/brand/logo-1.png') }}"
-              alt="Behrens & Behrens"
-              height="75"
-              class="mx-1 rounded"
-            />
+      <div style="margin-top: 100px"></div>
 
-            <img
-              src="{{ url_for('static', filename='assets/brand/logo-2.png') }}"
-              alt="Behrens & Behrens"
-              height="75"
-              class="mx-1 rounded"
-            />
-          </h3>
-          <nav class="nav nav-masthead justify-content-center float-md-end">
-            <a
-              class="nav-link fw-bold py-1 px-0 {% if active_page == 'home' %}active{% endif %}"
-              aria-current="page"
-              href="{{ url_for('landing') }}"
-              >Home</a
-            >
-
-            <a
-              class="nav-link fw-bold py-1 px-0 {% if active_page == 'products' %}active{% endif %}"
-              href="{{ url_for('main_index') }}"
-              >Products</a
-            >
-
-            <a
-              class="nav-link fw-bold py-1 px-0 {% if active_page == 'simulator' %}active{% endif %}"
-              href="{{ url_for('simulator_index') }}"
-              >Simulator</a
-            >
-
-            <a
-              class="nav-link fw-bold py-1 px-0 {% if active_page == 'contact' %}active{% endif %}"
-              href="{{ url_for('contact') }}"
-              >Contact</a
-            >
-          </nav>
-        </div>
-      </header>
       <main class="px-3">{% block content %}{% endblock %}</main>
+
       <footer class="mt-auto text-white-50">
         <p>
-          © 2025 Behrens & Behrens<br />
-          Caution, capital investments involve risks.
+          © 2025 Behrens & Behrens<br />Caution, capital investments involve
+          risks.
         </p>
       </footer>
     </div>
-    <script
-      src="{{ url_for('static', filename='assets/dist/js/bootstrap.bundle.min.js') }}"
-      class="astro-vvvwv3sm"
-    ></script>
+
+    <script src="{{ url_for('static', filename='assets/dist/js/bootstrap.bundle.min.js') }}"></script>
   </body>
 </html>

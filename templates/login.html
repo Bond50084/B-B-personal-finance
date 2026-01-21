@@ -1,0 +1,56 @@
+{% extends "base.html" %} {% block title %}Login • Behrens & Behrens{% endblock
+%} {% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-6 col-lg-4">
+    <div
+      class="p-4 border rounded-3 bg-dark shadow-lg"
+      style="border-color: rgba(255, 255, 255, 0.1) !important"
+    >
+      <h2 class="mb-4 text-white">Login</h2>
+
+      <form action="{{ url_for('login') }}" method="POST">
+        <div class="mb-3 text-start">
+          <label for="email" class="form-label text-white-50"
+            >Email Address</label
+          >
+          <input
+            type="email"
+            class="form-control bg-dark text-white border-secondary"
+            id="email"
+            name="email"
+            required
+            placeholder="name@example.com"
+          />
+        </div>
+
+        <div class="mb-4 text-start">
+          <label for="password" class="form-label text-white-50"
+            >Password</label
+          >
+          <input
+            type="password"
+            class="form-control bg-dark text-white border-secondary"
+            id="password"
+            name="password"
+            required
+            placeholder="*******"
+          />
+        </div>
+
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-light fw-bold">Sign In</button>
+        </div>
+      </form>
+
+      <hr class="my-4" style="opacity: 0.1" />
+
+      <p class="text-white-50">
+        New here?
+        <a href="{{ url_for('register') }}" class="text-white fw-bold"
+          >Create an account</a
+        >
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

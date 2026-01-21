@@ -1,0 +1,46 @@
+{% extends "base.html" %} {% block title %}Add Customer{% endblock %} {% block
+content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-6">
+    <div
+      class="p-4 border rounded-3 bg-dark shadow-lg"
+      style="border-color: rgba(255, 255, 255, 0.1) !important"
+    >
+      <h2 class="mb-4 text-white">Neuen Kunden anlegen</h2>
+
+      <form method="POST">
+        <div class="mb-3 text-start">
+          <label class="form-label text-white-50">Vorname</label>
+          <input
+            type="text"
+            name="first_name"
+            class="form-control bg-dark text-white border-secondary"
+            required
+            placeholder="z.B. Max"
+          />
+        </div>
+
+        <div class="mb-4 text-start">
+          <label class="form-label text-white-50">Nachname</label>
+          <input
+            type="text"
+            name="last_name"
+            class="form-control bg-dark text-white border-secondary"
+            required
+            placeholder="z.B. Mustermann"
+          />
+        </div>
+
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary fw-bold">
+            Dataset erstellen
+          </button>
+          <a href="{{ url_for('user_home') }}" class="btn btn-outline-light"
+            >Abbrechen</a
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

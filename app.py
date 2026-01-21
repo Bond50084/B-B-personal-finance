@@ -22,10 +22,189 @@ from plot_generator import plot_to_base64, generate_plot1, generate_plot2, gener
 import plot_generator
 from matplotlib.backends.backend_pdf import PdfPages
 
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
+from flask_bcrypt import Bcrypt
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
+from flask_login import login_required, current_user
+
+
 
 
 app = Flask(__name__)
-app.secret_key = 'some_key'
+app.secret_key = 'some_key' # In Produktion bitte ändern!
+
+# --- 1. DATENBANK & SECURITY KONFIGURATION ---
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+
+# --- 2. LOGIN MANAGER KONFIGURATION ---
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login' # Wenn User nicht eingeloggt ist, hierhin schicken
+
+# --- 3. DAS USER MODEL (Muss VOR dem Admin-Teil stehen!) ---
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.String(150), nullable=False)
+    has_license = db.Column(db.Boolean, default=False) 
+
+# --- ADD THIS TO app.py (After the User class) ---
+
+class Customer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+    # This column stores all simulation inputs (cash, rent, dates) as a text string (JSON)
+    simulation_data = db.Column(db.Text, nullable=True) 
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Link to the User so we can do current_user.customers
+    user = db.relationship('User', backref=db.backref('customers', lazy=True))
+
+
+# User Loader für Flask-Login
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+@app.route('/my-account')
+@login_required
+def user_home():
+    return render_template('user_home.html')
+
+
+# --- NEW ROUTES FOR CLIENT MANAGEMENT ---
+
+@app.route('/add-customer', methods=['GET', 'POST'])
+@login_required
+def add_customer():
+    if request.method == 'POST':
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        
+        # Create new customer
+        new_customer = Customer(first_name=first_name, last_name=last_name, user_id=current_user.id)
+        
+        # Optional: Set default simulation data so the form isn't empty
+        default_data = {
+            'initial_cash': 400000,
+            'invest_frac': 0.8,
+            'start_date': '2025-01-31',
+            # ... you can add more defaults here if you like
+        }
+        new_customer.simulation_data = json.dumps(default_data)
+        
+        db.session.add(new_customer)
+        db.session.commit()
+        
+        # Redirect directly to their simulation page
+        return redirect(url_for('customer_simulation', customer_id=new_customer.id))
+        
+    return render_template('add_customer.html')
+
+@app.route('/customer/<int:customer_id>', methods=['GET', 'POST'])
+@login_required
+def customer_simulation(customer_id):
+    customer = Customer.query.get_or_404(customer_id)
+    
+    # Security check: Ensure this customer belongs to the logged-in user
+    if customer.user_id != current_user.id:
+        return "Unauthorized Access", 403
+
+    # Load saved data (convert JSON string back to Python dictionary)
+    saved_data = {}
+    if customer.simulation_data:
+        try:
+            saved_data = json.loads(customer.simulation_data)
+        except:
+            saved_data = {}
+
+    return render_template('simulator_parameters.html', customer=customer, saved_data=saved_data)
+
+@app.route('/customer/<int:customer_id>/delete')
+@login_required
+def delete_customer(customer_id):
+    customer = Customer.query.get_or_404(customer_id)
+    if customer.user_id == current_user.id:
+        db.session.delete(customer)
+        db.session.commit()
+    return redirect(url_for('user_home'))
+
+
+
+
+
+
+# --- 4. ADMIN DASHBOARD (Muss NACH dem User Model stehen) ---
+# Falls 'template_mode' Fehler wirft, entferne ", template_mode='bootstrap3'"
+admin = Admin(app, name='Mein Dashboard')#, template_mode='bootstrap3')
+admin.add_view(ModelView(User, db.session))
+
+# --- 5. AUTH ROUTES (LOGIN / REGISTER / LOGOUT) ---
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(email=email).first()
+        
+        # Prüfen ob User existiert UND Passwort stimmt
+        if user and bcrypt.check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for('simulator_index'))
+        else:
+            return "Falsches Passwort oder Email", 401
+            
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        # Passwort hashen (verschlüsseln)
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        
+        # Neuen User erstellen
+        new_user = User(email=email, password=hashed_password, has_license=False)
+        db.session.add(new_user)
+        db.session.commit()
+        
+        return redirect(url_for('login'))
+        
+    return render_template('register.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('landing'))
+
+# --- NEUE PRODUKTSEITEN ---
+
+@app.route('/products/foerder-match')
+def foerder_match():
+    # Du brauchst noch eine foerder_match.html, nimm erstmal eine Kopie der Landingpage oder Contact
+    return render_template('contact.html', active_page='products') 
+
+@app.route('/products/esg-reader')
+def esg_reader():
+    # Du brauchst noch eine esg_reader.html
+    return render_template('contact.html', active_page='products')
+
+###Ende neuer Flask ROuten für Login und so 
+
+
+
 
 # Helper function to convert plot to base64 image
 def plot_to_base64(fig):
@@ -174,13 +353,20 @@ def landing():
 
 # --- The Old Main Page (Now "Products" or "Dashboard") ---
 @app.route('/products')
+
 def main_index():
     # This renders your existing product overview
     return render_template('main_index.html', active_page='products')
 
 @app.route('/simulator')
+@login_required  # <--- DIESER BEFEHL SCHÜTZT DIE SEITE!
 def simulator_index():
+    # Check: Hat der User auch bezahlt?
+    if not current_user.has_license:
+        return "Bitte kaufen Sie erst eine Lizenz!", 403
+        
     return render_template('simulator_parameters.html', active_page='simulator')
+
 
 @app.route('/contact')
 def contact():
@@ -191,14 +377,47 @@ def simulator_documentation():
     # This would be a new page for your documentation
     return render_template('documentation.html', active_page='documentation') # You'll need to create documentation.html
 
+@app.route('/simulator/save', methods=['POST'])
+@login_required
+def save_customer_data():
+    customer_id = request.form.get('customer_id')
+    
+    if customer_id:
+        customer = Customer.query.get_or_404(customer_id)
+        
+        # Security: Ensure the customer belongs to the current user
+        if customer.user_id != current_user.id:
+            return "Unauthorized Access", 403
+
+        # Capture all form data and save it
+        form_data = request.form.to_dict()
+        customer.simulation_data = json.dumps(form_data)
+        db.session.commit()
+        
+        # Redirect back to the edit page
+        return redirect(url_for('customer_simulation', customer_id=customer.id))
+    
+    # If no customer ID (shouldn't happen if button is hidden), go back to index
+    return redirect(url_for('simulator_index'))
 
 
 @app.route('/simulator/run', methods=['POST'])
+@login_required
 def run():
     """
     Handles the simulation request, runs the simulation, generates plots,
     and displays results.
     """
+    customer_id = request.form.get('customer_id')
+    if customer_id:
+        customer = Customer.query.get(customer_id)
+        if customer and customer.user_id == current_user.id:
+            # Dump the entire form data into the database as JSON
+            # We convert the ImmutableMultiDict to a regular dict
+            form_data = request.form.to_dict()
+            customer.simulation_data = json.dumps(form_data)
+            db.session.commit()
+
     try:
         # Extract form data
         start_date_str = request.form['start_date']
@@ -370,190 +589,7 @@ def run():
 
         # Plot 8: Cumulative Distribution of Final Total Wealth
         fig8 = generate_plot8(total_paths, median_final_wealth, percentile_5, percentile_90_wealth, end_date_str)
-        plots['plot8'] = plot_to_base64(fig8)
-        
-        '''
-        fig1 = plt.figure(figsize=(10, 10)) # Increase figure height to accommodate text
-        gs1 = gridspec.GridSpec(2, 1, height_ratios=[4, 1]) # 4 parts for plot, 1 for text
-        ax1 = fig1.add_subplot(gs1[0, 0]) # Main plot
-        ax1_text = fig1.add_subplot(gs1[1, 0]) # Text subplot
-        ax1.plot(t_years, median_cash, label='Median Cash Account', linestyle='--', marker='^', markersize=4, color='green')
-        ax1.plot(t_years, median_port, label='Median Portfolio Value', linestyle='-', marker='D', markersize=3, color='purple')
-        ax1.fill_between(t_years, p5_total, p80_total, color='orange', alpha=0.3, label='5–80th %ile Total Wealth')
-        ax1.plot(t_years, median_total, label='Median Total Wealth', linewidth=2.5, color='orange', linestyle='-')
-        ax1.axhline(threshold_cash, color='crimson', linestyle='--', linewidth=1.5, label=f'Cash Threshold €{threshold_cash:,.0f}')
-        ax1.set_xlabel('Years since Start Date')
-        ax1.set_ylabel('Amount (€)')
-        ax1.set_title('Key Financial Trajectories with 5–80%ile Shading')
-        apply_scientific_style(ax1, plot_params_text)
-        ax1.xaxis.set_major_locator(ticker.MultipleLocator(5))
-        ax1.xaxis.set_minor_locator(ticker.MultipleLocator(1))
-        ax1.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x)}y'))
-        ax1.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        ax1_text.text(0.0, 1.0, plot_params_text, transform=ax1_text.transAxes,
-                 fontsize=9, verticalalignment='top', bbox=dict(boxstyle='round,pad=0.5', fc='white', alpha=0.6))
-        ax1_text.axis('off') # Hide the axes for the text subplot
-        fig1.tight_layout(rect=[0, 0.03, 1, 1]) # Adjust layout to prevent o
-        plots['plot1'] = plot_to_base64(fig1)
-        
-        # --- Plot 2: Cumulative Cash Components Over Time ---
-        fig2, ax2 = plt.subplots(figsize=(10, 6))
-        ax2.plot(t, cum_first_person, label='Cumulative First Person Income', linestyle=':', marker='o', markersize=3, color='darkgreen')
-        ax2.plot(t, cum_second_person, label='Cumulative Second Person Income', linestyle='--', marker='s', markersize=3, color='darkblue')
-        ax2.plot(t, cum_expense, label='Cumulative Expenses', linestyle='-', color='firebrick')
-        #ax2.plot(t, cum_large_payments, label='Cumulative Large Payments/Withdrawals', linestyle='-.', marker='x', markersize=4, color='gray')
-        ax2.plot(t, cum_income, label = 'Cumulative Total Income', linestyle='-', linewidth=1.5, color='teal')
-        ax2.plot(t, cum_net, label= 'Cumulative Net Cash', linewidth = 3.5, color='black', linestyle='-')
-        ax2.axhline(threshold_cash, color='red', linestyle='--', linewidth=1.5, label=f'Cash Threshold €{threshold_cash:,.0f}')
-        ax2.set_xlabel('Months since Start Date')
-        ax2.set_ylabel('Amount (€)')
-        ax2.set_title('Cumulative Cash Components Over Time')
-        ax2.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        apply_scientific_style(ax2, plot_params_text)
-        plots['plot2'] = plot_to_base64(fig2)
-        
-        # --- Plot 2: Cumulative Cash Components Over Time ---
-        fig2 = plt.figure(figsize=(10, 10)) # Increase figure height for text
-        gs2 = gridspec.GridSpec(2, 1, height_ratios=[4, 1]) # 4 parts for plot, 1 for text
-        ax2 = fig2.add_subplot(gs2[0, 0]) # Main plot
-        ax2_text = fig2.add_subplot(gs2[1, 0]) # Text subplot
-
-        marker_interval = 6 
-        ax2.plot(t[::marker_interval], cum_first_person[::marker_interval], label='Cumulative First Person Income', linestyle=':', marker='o', markersize=4, color='darkgreen', markevery=marker_interval)
-        ax2.plot(t[::marker_interval], cum_second_person[::marker_interval], label='Cumulative Second Person Income', linestyle='--', marker='s', markersize=4, color='darkblue', markevery=marker_interval)
-        ax2.plot(t, cum_expense, label='Cumulative Expenses', linestyle='-', color='firebrick', linewidth=1.5) # No markers, or very subtle if needed
-        # ax2.plot(t[::marker_interval], cum_large_payments[::marker_interval], label='Cumulative Large Payments/Withdrawals', linestyle='-.', marker='x', markersize=4, color='gray', markevery=marker_interval) # If you decide to re-include this
-        ax2.plot(t, cum_income, label='Cumulative Total Income', linestyle='-', linewidth=2, color='teal') # Increased linewidth
-        ax2.plot(t, cum_net, label='Cumulative Net Cash', linewidth=3.5, color='black', linestyle='-')
-
-        ax2.axhline(threshold_cash, color='red', linestyle='--', linewidth=1.5, label=f'Cash Threshold €{threshold_cash:,.0f}')
-        ax2.set_xlabel('Months since Start Date')
-        ax2.set_ylabel('Amount (€)')
-        ax2.set_title('Cumulative Cash Components Over Time')
-
-        # Position the legend to avoid overlapping with data if possible. 'upper left' is usually good for cumulative plots.
-        ax2.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True)
-
-        apply_scientific_style(ax2) # Call without plot_params_text as it's handled separately
-
-        # Add text to the dedicated subplot
-        
-        ax2_text.text(0.0, 1.0, text_plot_2, transform=ax2_text.transAxes,
-                    fontsize=9, verticalalignment='top', bbox=dict(boxstyle='round,pad=0.5', fc='white', alpha=0.6))
-        ax2_text.axis('off') # Hide the axes for the text subplot
-        fig2.tight_layout(rect=[0, 0.03, 1, 1]) # Adjust layout
-        plots['plot2'] = plot_to_base64(fig2)
-        
-        
-        
-        
-        
-        # --- Plot 3: Monthly Cash Flow Components Over Time ---
-        fig3, ax3 = plt.subplots(figsize=(10, 10))
-        ax3.plot(df.index, df['expenses'], label='Total Monthly Expenses', linestyle='dashed', color='red', marker='v', markersize=2, alpha=0.7)
-        ax3.plot(df.index, df['income'], label='Total Monthly Income', linestyle='dashed', color='green', marker='^', markersize=2, alpha=0.7)
-        ax3.plot(df.index, df['net_cash'], label='Monthly Net Cash', linestyle='solid', color='blue', linewidth=1.5)
-        ax3.set_xlabel('Date')
-        ax3.set_ylabel('Amount (€ / month)')
-        ax3.set_title('Monthly Cash Flow Components Over Time')
-        apply_scientific_style(ax3)
-        ax3.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-        ax3.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        fig3.autofmt_xdate()
-        plots['plot3'] = plot_to_base64(fig3)
-        
-        # --- Plot 4: Histogram of Final Total Wealth ---
-        fig4, ax4 = plt.subplots(figsize=(10, 10))
-        final = total_paths[:, -1]
-        ax4.hist(final, bins=30, density=True, alpha=0.8, color='skyblue', edgecolor='black')
-        ax4.axvline(median_final_wealth, color='red', linestyle='--', label=f'Median Final Wealth: €{median_final_wealth:,.0f}')
-        ax4.axvline(percentile_5, color = 'black', label= f'5th Percentile: €{percentile_5:,.0f}', linestyle='--')
-        ax4.set_xlabel('Final Total Wealth (€)')
-        ax4.set_ylabel('Probability Density')
-        ax4.set_title(f'Histogram of Final Total Wealth ({df.index[-1].strftime("%b %Y")})')
-        ax4.legend(loc='upper right', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        apply_scientific_style(ax4)
-        plots['plot4'] = plot_to_base64(fig4)
-
-        # --- Plot 5: Probability of Cash Account Reaching Critical Levels Over Time ---
-        fig5, ax5 = plt.subplots(figsize=(10, 10))
-        ax5.plot(t, prob_below_threshold, label=f'Probability Cash < €{threshold_cash:,.0f}', color='blue', linewidth=2, marker='.')
-        ax5.plot(t, prob_zero_cash, label='Probability Cash <= €0', color='red', linestyle='--', linewidth=2, marker='x')
-        ax5.set_xlabel('Months since Start Date')
-        ax5.set_ylabel('Probability')
-        ax5.set_title('Probability of Cash Account Reaching Critical Levels Over Time')
-        ax5.set_ylim(0, 1)
-        ax5.legend(loc='upper right', fontsize=9, frameon=True, shadow=True, fancybox=True)
-        apply_scientific_style(ax5)
-        plots['plot5'] = plot_to_base64(fig5) # This was plot5 in the original, but results.html refers to it as plot3, so I will map it accordingly
-        
-        # --- Plot 6: Median Total Wealth Breakdown: Cash vs. Portfolio (Stacked Area Plot) ---
-        fig6, ax6 = plt.subplots(figsize=( 10, 10))
-        ax6.stackplot(t, median_cash, median_port, labels=['Median Cash Account', 'Median Portfolio Value'], alpha=0.8, colors=['lightgreen', 'lightblue'])
-        ax6.plot(t, median_total, color='black', linestyle='--', linewidth=2, label='Median Total Wealth')
-        ax6.set_xlabel('Months since Start Date')
-        ax6.set_ylabel('Amount (€)')
-        ax6.set_title('Median Total Wealth Breakdown: Cash vs. Portfolio')
-        # Manually add legend for stackplot as apply_scientific_style might override
-        ax6.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True) 
-        # Hide the generic text added by apply_scientific_style and add it back manually if needed
-        # apply_scientific_style(ax6, plot_params_text) # This will add the text twice if not careful
-        #ax6.text(0.02, 0.98, plot_params_text, transform=ax6.transAxes,
-         #           fontsize=9, verticalalignment='top', bbox=dict(boxstyle='round,pad=0.5', fc='wheat', alpha=0.6))
-        
-        plots['plot6'] = plot_to_base64(fig6)
-
-        # --- Plot 7: Annual Net Cash Flow (Bar Chart) ---
-        fig7, ax7 = plt.subplots(figsize=(10, 10))
-        df_annual = df.resample('Y').sum(numeric_only=True)
-        annual_net_cash = df_annual['net_cash']
-        annual_labels = [str(x.year) for x in df_annual.index]
-        bars = ax7.bar(annual_labels, annual_net_cash, color=['skyblue' if x >= 0 else 'lightcoral' for x in annual_net_cash], edgecolor='black', linewidth=0.7)
-        ax7.axhline(0, color='red', linestyle='--', linewidth=1.5)
-        ax7.set_xlabel('Year')
-        ax7.set_ylabel('Annual Net Cash Flow (€)')
-        ax7.set_title('Annual Net Cash Flow (Income - Expenses + Large Payments)')
-        ax7.tick_params(axis='x', rotation=45) # Removed ha='right'
-        ax7.legend(loc='upper right', fontsize=9, frameon=True, shadow=True, fancybox=True) 
-        apply_scientific_style(ax7)
-        for bar in bars:
-            yval = bar.get_height()
-            # Adjust y-position slightly to move text just above/below the bar
-            text_y_offset = 5000 # Smaller offset for closer placement
-            ha = 'center'
-            va = 'bottom' if yval >= 0 else 'top'
-            
-            
-            rotation_angle = 90 # Rotate text by 90 degrees
-            
-            ax7.text(bar.get_x() + bar.get_width()/2, yval + (text_y_offset if yval >= 0 else -text_y_offset), f'€{yval:,.0f}',
-                     ha=ha, va=va, fontsize=8, color='black', rotation=rotation_angle) # Add rotation
-            
-        plots['plot7'] = plot_to_base64(fig7)
-        
-        fig8, ax8 = plt.subplots(figsize=(10, 6))
-        final_wealth_values = total_paths[:, -1]
-        sorted_final_wealth = np.sort(final_wealth_values)
-        cdf = np.arange(1, len(sorted_final_wealth) + 1) / len(sorted_final_wealth)
-
-        ax8.plot(sorted_final_wealth, cdf, color='darkgreen', linewidth=2)
-        ax8.set_xlabel('Final Total Wealth (€)')
-        ax8.set_ylabel('Cumulative Probability')
-        ax8.set_title(f'Cumulative Distribution of Final Total Wealth ({df.index[-1].strftime("%b %Y")})')
-        ax8.grid(True, which='major', linestyle='-', linewidth='0.7', color='lightgray', alpha=0.8)
-        ax8.grid(True, which='minor', linestyle=':', linewidth='0.5', color='lightgray', alpha=0.5)
-        ax8.set_ylim(0, 1) # CDF always ranges from 0 to 1
-
-        # Add lines for median and 5th percentile for better context
-        ax8.axvline(median_final_wealth, color='red', linestyle='--', label=f'Median: €{median_final_wealth:,.0f}')
-        ax8.axvline(percentile_5, color='orange', linestyle='--', label=f'5th Percentile: €{percentile_5:,.0f}')
-        ax8.axvline(percentile_90_wealth, color='blue', linestyle='--', label=f'90th Percentile: €{percentile_90_wealth:,.0f}') # Assuming percentile_90_wealth is actually the 10th percentile
-        ax8.legend(loc='upper left', fontsize=9, frameon=True, shadow=True, fancybox=True)
-
-        apply_scientific_style(ax8) # Apply the consistent style
-        plots['plot8'] = plot_to_base64(fig8) # Assign to 'plot8'
-        #return render_template('results.html', plots=plots, final_wealth=f"€{median_final_wealth:,.0f}", final_wealth_after_tax = f"€{median_final_wealth_after_taxes:,.0f}")
-        '''
+        plots['plot8'] = plot_to_base64(fig8)   
         
         
         return render_template(
@@ -672,13 +708,13 @@ def download_report():
 
 
 if __name__ == '__main__':
-    # This block is for local development. In a Canvas environment, the app is run differently.
-    # To run locally, create a 'templates' folder and put index.html and results.html inside.
-    # Create a 'static' folder and put placeholder images (or your actual images) inside.
-    # You might need to install Flask: pip install Flask
-    # Then run: python app.py
-    app.run(debug=True) # For local debugging
+    # Erst die Datenbank erstellen...
+    with app.app_context():
+        db.create_all()
+        print("Datenbank wurde geprüft/erstellt.")
 
+    # ...dann den Server starten (nur einmal!)
+    app.run(debug=True)
 
 '''
         # --- Plot 8: Cumulative Impact of Large Financial Events ---

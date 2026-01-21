@@ -1,0 +1,88 @@
+{% extends "base.html" %} {% block title %}My Account • Behrens & Behrens{%
+endblock %} {% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div
+        class="d-flex justify-content-between align-items-center mb-4 text-white"
+      >
+        <div>
+          <h2>My Dashboard</h2>
+          <p class="text-white-50">Manage your client simulations</p>
+        </div>
+        <div>
+          <a
+            href="{{ url_for('add_customer') }}"
+            class="btn btn-primary fw-bold"
+          >
+            + Kunden hinzufügen
+          </a>
+        </div>
+      </div>
+
+      <div class="card bg-dark border-secondary shadow-lg">
+        <div class="card-header border-secondary text-white-50">
+          Your Clients
+        </div>
+        <div class="list-group list-group-flush">
+          {% if current_user.customers %} {% for customer in
+          current_user.customers %}
+          <div
+            class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center p-3"
+          >
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-secondary rounded-circle d-flex justify-content-center align-items-center"
+                style="width: 40px; height: 40px"
+              >
+                <span class="fw-bold"
+                  >{{ customer.first_name[0] }}{{ customer.last_name[0] }}</span
+                >
+              </div>
+              <div>
+                <h5 class="mb-0">
+                  {{ customer.first_name }} {{ customer.last_name }}
+                </h5>
+                <small class="text-white-50"
+                  >Last update: {{ customer.created_at.strftime('%Y-%m-%d')
+                  }}</small
+                >
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <a
+                href="{{ url_for('customer_simulation', customer_id=customer.id) }}"
+                class="btn btn-outline-light btn-sm"
+              >
+                Open Simulation
+              </a>
+              <a
+                href="{{ url_for('delete_customer', customer_id=customer.id) }}"
+                class="btn btn-outline-danger btn-sm"
+                onclick="return confirm('Are you sure?')"
+              >
+                🗑
+              </a>
+            </div>
+          </div>
+          {% endfor %} {% else %}
+          <div class="p-5 text-center text-white-50">
+            <h4>No clients yet.</h4>
+            <p>
+              Click "Kunden hinzufügen" to start your first simulation profile.
+            </p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="mt-5 text-center">
+        <a href="{{ url_for('logout') }}" class="btn btn-link text-white-50"
+          >Logout</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
