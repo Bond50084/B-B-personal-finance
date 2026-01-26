@@ -1,5 +1,9 @@
 Flask
+gunicorn
 pandas
 numpy
 matplotlib
-gunicorn
+flask-sqlalchemy
+flask-login
+flask-bcrypt
+flask-admin

@@ -1,0 +1,45 @@
+{% extends "base.html" %} {% block title %}Dokumentation • Behrens & Behrens{%
+endblock %} {% block head_extra %}
+<style>
+  /* 1. Remove Top Padding from Main */
+  /* Since base.html adds padding-top: 100px to <main>, we might need to override it 
+     if you want the slides to touch the very top. If you want the navbar visible, keep it. */
+
+  .presentation-container {
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: #1a1d20; /* Matches your dark theme */
+    min-height: 100vh;
+  }
+
+  .slide-img {
+    width: 100%;
+    height: auto;
+    display: block; /* Critical: removes tiny white gaps between images */
+    margin: 0;
+    padding: 0;
+  }
+</style>
+{% endblock %} {% block content %}
+
+<div class="presentation-container">
+  {# Loop from 1 to 12 #} {% for i in range(1, 13) %}
+  <img
+    src="{{ url_for('static', filename='assets/presentation/' ~ i ~ '.jpg') }}"
+    class="slide-img"
+    alt="Dokumentation Slide {{ i }}"
+    loading="lazy"
+  />
+  {% endfor %}
+</div>
+
+<div class="text-center py-5 bg-dark">
+  <a
+    href="{{ url_for('foerder_match') }}"
+    class="btn btn-outline-light rounded-pill"
+  >
+    &larr; Zurück zum Förder-Match
+  </a>
+</div>
+
+{% endblock %}

@@ -53,6 +53,20 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(150), nullable=False)
     has_license = db.Column(db.Boolean, default=False) 
 
+# --- NEUES MODELL: FÖRDERMITTEL ANFRAGEN ---
+class FoerderRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    # Falls der User eingeloggt ist, speichern wir die ID (optional)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    
+    company_name = db.Column(db.String(150), nullable=False)
+    industry = db.Column(db.String(100))
+    description = db.Column(db.Text) # Hier beschreibt er das Vorhaben
+    contact_email = db.Column(db.String(150))
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 # --- ADD THIS TO app.py (After the User class) ---
 
 class Customer(db.Model):
@@ -191,10 +205,38 @@ def logout():
 
 # --- NEUE PRODUKTSEITEN ---
 
-@app.route('/products/foerder-match')
+@app.route('/products/foerder-match', methods=['GET', 'POST'])
 def foerder_match():
-    # Du brauchst noch eine foerder_match.html, nimm erstmal eine Kopie der Landingpage oder Contact
-    return render_template('contact.html', active_page='products') 
+    success = False
+    
+    if request.method == 'POST':
+        # Daten aus dem Formular holen
+        company = request.form.get('company_name')
+        industry = request.form.get('industry')
+        desc = request.form.get('description')
+        email = request.form.get('email')
+        
+        # In Datenbank speichern
+        new_req = FoerderRequest(
+            company_name=company,
+            industry=industry,
+            description=desc,
+            contact_email=email,
+            user_id=current_user.id if current_user.is_authenticated else None
+        )
+        db.session.add(new_req)
+        db.session.commit()
+        
+        success = True # Damit wir im HTML "Danke!" anzeigen können
+
+    return render_template('foerder_match.html', active_page='foerder_match', success=success)
+
+@app.route('/presentation')
+def presentation():
+    # Make sure to pass the active_page if you want a tab highlighted, 
+    # otherwise just leave it empty.
+    return render_template('presentation.html')
+
 
 @app.route('/products/esg-reader')
 def esg_reader():

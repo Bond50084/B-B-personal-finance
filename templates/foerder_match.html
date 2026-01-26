@@ -1,0 +1,324 @@
+{% extends "base.html" %} {% block title %}Förder-Match • Behrens & Behrens{%
+endblock %} {% block head_extra %}
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+<style>
+  /* --- 1. HERO BACKGROUND (Exact copy of landing.html logic) --- */
+  .hero-fixed-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh; /* Full screen height */
+
+    /* YOUR IMAGE */
+    background-image: url('{{ url_for("static", filename="assets/eu_match.jpg") }}');
+
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+    will-change: filter;
+
+    /* Flexbox to center the Text on the image */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* --- 2. TEXT OVERLAY ON IMAGE --- */
+  .hero-overlay-title {
+    font-size: 4rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+  }
+  .hero-overlay-subtitle {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 300;
+    max-width: 800px;
+    padding: 0 1rem;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
+    line-height: 1.4;
+  }
+
+  /* --- 3. THE CURTAIN (Scrolling Part) --- */
+  .content-curtain {
+    position: relative;
+
+    /* Keep existing settings */
+    margin-top: 40vh;
+    background-color: #1a1d20;
+    color: white;
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+    box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.5);
+    min-height: 100vh;
+
+    /* --- ADD THESE 3 LINES TO FIX THE SIDES --- */
+    width: 100vw; /* Force width to be 100% of the Viewport */
+    margin-left: calc(50% - 50vw); /* Pulls the left edge to the screen edge */
+    margin-right: calc(
+      50% - 50vw
+    ); /* Pulls the right edge to the screen edge */
+  }
+
+  /* --- 4. CONTENT STYLES --- */
+
+  /* Steps Icons */
+  .step-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.1);
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Form Container */
+  .contact-form-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Form Elements */
+  .form-control {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+  }
+  .form-control:focus {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-color: white;
+    color: white;
+    box-shadow: none;
+  }
+  .form-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: block;
+    text-align: left;
+  }
+  .btn-submit {
+    background: white;
+    color: black;
+    font-weight: bold;
+    padding: 1rem 3rem;
+    border-radius: 50px;
+    border: none;
+    transition: transform 0.2s;
+    margin-top: 1rem;
+  }
+  .btn-submit:hover {
+    transform: scale(1.05);
+    background: #f0f0f0;
+  }
+</style>
+{% endblock %} {% block content %}
+
+<div class="hero-fixed-bg" id="hero-bg">
+  <div class="hero-overlay-title" data-aos="fade-down">Smart Funding</div>
+  <div class="hero-overlay-subtitle" data-aos="fade-up" data-aos-delay="100">
+    Lassen Sie den Staat Ihr Wachstum finanzieren.
+  </div>
+</div>
+
+<div class="content-curtain">
+  <div class="container">
+    <div class="row justify-content-center text-center mb-5" data-aos="fade-up">
+      <div class="col-lg-8">
+        <h2 class="fw-bold mb-4">Der EU-Fördermittel Dschungel.</h2>
+        <p class="lead text-white-50">
+          Es gibt über 1.500 Förderprogramme in der EU. Manuell ist der
+          Überblick unmöglich. Unser Algorithmus matcht Ihre Unternehmensdaten
+          mit allen verfügbaren Töpfen – in Sekunden.
+        </p>
+        <p class="mt-4">
+          <span class="text-white-50"
+            >Für genaue Erläuterung klicken sie auf unsere</span
+          >
+          <a
+            href="{{ url_for('presentation') }}"
+            class="text-primary fw-bold text-decoration-underline"
+          >
+            Dokumentation &rarr;
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <div class="row g-4 mt-2 mb-5 text-center">
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="step-icon">🏢</div>
+        <h4 class="text-white">1. Profiling</h4>
+        <p class="text-white-50 small px-4">
+          Sie beschreiben Ihr Projekt oder Unternehmen in der Maske unten.
+        </p>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="step-icon">🤖</div>
+        <h4 class="text-white">2. AI-Scan</h4>
+        <p class="text-white-50 small px-4">
+          Unsere Software gleicht Ihr Profil mit Datenbanken von Bund & EU ab.
+        </p>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="step-icon">💰</div>
+        <h4 class="text-white">3. Report</h4>
+        <p class="text-white-50 small px-4">
+          Sie erhalten eine Liste mit "High-Probability" Zuschüssen.
+        </p>
+      </div>
+    </div>
+
+    <div class="row justify-content-center mt-5">
+      <div class="col-lg-8" data-aos="zoom-in">
+        <div class="contact-form-card">
+          {% if success %}
+          <div class="text-center py-5">
+            <div style="font-size: 4rem">✅</div>
+            <h2 class="text-white mt-3">Anfrage erhalten!</h2>
+            <p class="text-white-50">
+              Unser Algorithmus startet die Analyse. Wir melden uns in Kürze per
+              E-Mail bei Ihnen.
+            </p>
+            <a
+              href="{{ url_for('landing') }}"
+              class="btn btn-outline-light mt-4 rounded-pill"
+            >
+              Zurück zur Startseite
+            </a>
+          </div>
+
+          {% else %}
+          <div class="text-center mb-5">
+            <h2 class="text-white">Starten Sie den Match.</h2>
+            <p class="text-white-50">
+              Kostenlose Ersteinschätzung Ihres Potentials.
+            </p>
+          </div>
+
+          <form action="{{ url_for('foerder_match') }}" method="POST">
+            <div class="mb-4">
+              <label for="company_name" class="form-label"
+                >Unternehmensname</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="company_name"
+                name="company_name"
+                required
+                placeholder="z.B. Behrens Tech GmbH"
+              />
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <label for="industry" class="form-label"
+                  >Branche / Sektor</label
+                >
+                <select
+                  class="form-select form-control"
+                  id="industry"
+                  name="industry"
+                  required
+                  style="
+                    background-color: rgba(0, 0, 0, 0.3);
+                    color: white;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                  "
+                >
+                  <option value="" selected disabled>Bitte wählen...</option>
+                  <option value="IT & Software">IT & Software</option>
+                  <option value="Manufacturing">Produktion & Industrie</option>
+                  <option value="Energy">Energie & Umwelt</option>
+                  <option value="Health">Gesundheit & Pharma</option>
+                  <option value="Services">Dienstleistung</option>
+                  <option value="Other">Sonstige</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-4">
+                <label for="email" class="form-label">E-Mail für Report</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  name="email"
+                  required
+                  value="{{ current_user.email if current_user.is_authenticated else '' }}"
+                  placeholder="name@firma.de"
+                />
+              </div>
+            </div>
+
+            <div class="mb-5">
+              <label for="description" class="form-label"
+                >Projekt- oder Geschäftsbeschreibung</label
+              >
+              <textarea
+                class="form-control"
+                id="description"
+                name="description"
+                rows="5"
+                required
+                placeholder="Beschreiben Sie kurz, was Sie tun oder welches Projekt Sie planen..."
+              ></textarea>
+              <div class="form-text text-white-50 text-end mt-2">
+                Je genauer, desto besser der Match.
+              </div>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn-submit">
+                Analyse anfordern 🚀
+              </button>
+            </div>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+  // 1. Initialize Animation Library
+  AOS.init({
+    offset: 100,
+    duration: 800,
+    easing: "ease-out-cubic",
+    once: true,
+  });
+
+  // 2. Blur Effect on Scroll (Copied from landing.html)
+  document.addEventListener("DOMContentLoaded", function () {
+    const heroBg = document.getElementById("hero-bg");
+    if (heroBg) {
+      window.addEventListener("scroll", function () {
+        let scrollPosition = window.scrollY;
+        // Adjust divider to control blur speed (higher number = slower blur)
+        let blurValue = scrollPosition / 40;
+        if (blurValue > 20) blurValue = 20; // Max blur
+        heroBg.style.filter = `blur(${blurValue}px)`;
+      });
+    }
+  });
+</script>
+
+{% endblock %}
