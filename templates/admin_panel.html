@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Admin • Behrens & Behrens{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-8">
+    <div class="p-4 border rounded-3 bg-dark shadow-lg text-start"
+         style="border-color: rgba(255,255,255,0.1) !important">
+      <h2 class="text-white mb-4">Admin-Panel</h2>
+      <p class="text-white-50">
+        Aktuell indexierte Förderprogramme: <strong class="text-white">{{ n_programs }}</strong>
+      </p>
+      <a href="{{ url_for('admin_download_programs') }}"
+         class="btn btn-light fw-bold rounded-pill">
+        ⬇ Alle Förderprogramme herunterladen (CSV)
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

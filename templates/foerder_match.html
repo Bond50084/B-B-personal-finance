@@ -127,6 +127,133 @@ endblock %} {% block head_extra %}
     transform: scale(1.05);
     background: #f0f0f0;
   }
+
+  /* --- 5. ERGEBNIS-KARTEN (Förder-Treffer) --- */
+  .fm-project {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    text-align: left;
+  }
+  .fm-result-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+    text-align: left;
+  }
+  .fm-result-title {
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.1rem;
+    line-height: 1.3;
+  }
+  .fm-result-provider {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.85rem;
+    margin-top: 0.15rem;
+  }
+  /* Passung-Badge, eingefärbt nach Rang (0=sehr hoch … 3=gering) */
+  .fm-badge {
+    white-space: nowrap;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 50px;
+    color: #fff;
+  }
+  .fm-badge-0 {
+    background: #2e7d32;
+  }
+  .fm-badge-1 {
+    background: #689f38;
+  }
+  .fm-badge-2 {
+    background: #f9a825;
+    color: #1a1d20;
+  }
+  .fm-badge-3 {
+    background: #c62828;
+  }
+  /* Rot → Grün Balken mit Pfeil */
+  .fm-bar-wrap {
+    position: relative;
+    margin: 0.75rem 0 0.25rem;
+  }
+  .fm-bar {
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #c62828 0%, #f9a825 50%, #2e7d32 100%);
+  }
+  .fm-bar-arrow {
+    position: absolute;
+    top: 8px;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 0.8rem;
+    line-height: 1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  }
+  .fm-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.7rem;
+    margin-top: 0.4rem;
+  }
+  .fm-facts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem 1.5rem;
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+  }
+  .fm-fact-label {
+    display: block;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.75rem;
+  }
+  .fm-comment {
+    margin-top: 1rem;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .fm-comment-label {
+    display: block;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.72rem;
+    margin-bottom: 0.25rem;
+  }
+  .fm-description {
+    margin-top: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+  .fm-description-label {
+    display: block;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.72rem;
+    margin-bottom: 0.25rem;
+  }
+  .fm-link {
+    color: #6ea8fe;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .fm-link:hover {
+    text-decoration: underline;
+  }
 </style>
 {% endblock %} {% block content %}
 
@@ -188,21 +315,118 @@ endblock %} {% block head_extra %}
     <div class="row justify-content-center mt-5">
       <div class="col-lg-8" data-aos="zoom-in">
         <div class="contact-form-card">
-          {% if success %}
-          <div class="text-center py-5">
-            <div style="font-size: 4rem">✅</div>
-            <h2 class="text-white mt-3">Anfrage erhalten!</h2>
+          {% if results is defined and results %}
+          <!-- ============ ERGEBNISSE ============ -->
+          <div class="text-center mb-4">
+            <h2 class="text-white">Ihre Förder-Treffer</h2>
             <p class="text-white-50">
-              Unser Algorithmus startet die Analyse. Wir melden uns in Kürze per
-              E-Mail bei Ihnen.
+              für <strong class="text-white">{{ client_name }}</strong> —
+              {{ results|length }} passende Programme, sortiert nach Eignung.
             </p>
-            <a
-              href="{{ url_for('landing') }}"
-              class="btn btn-outline-light mt-4 rounded-pill"
-            >
-              Zurück zur Startseite
-            </a>
           </div>
+
+          {% if project_description %}
+          <div class="fm-project mb-4">
+            <div class="text-white-50 small mb-1">Ihre Projektbeschreibung</div>
+            <div class="text-white">{{ project_description }}</div>
+          </div>
+          {% endif %}
+
+          {% for r in results %}
+          <div class="fm-result-card">
+            <div
+              class="d-flex justify-content-between align-items-start gap-3 mb-2"
+            >
+              <div class="text-start">
+                <div class="fm-result-title">
+                  {{ r.position }}. {{ r.title }}
+                </div>
+                <div class="fm-result-provider">{{ r.provider }}</div>
+              </div>
+              {% if r.passung %}
+              <span
+                class="fm-badge fm-badge-{{ r.passung_rank }}"
+                title="KI-Bewertung der Passung"
+                >{{ r.passung }}</span
+              >
+              {% endif %}
+            </div>
+
+            {% if r.passung %}
+            <!-- Rot→Grün Balken mit Pfeil je nach Passung -->
+            <div class="fm-bar-wrap">
+              <div class="fm-bar"></div>
+              <div
+                class="fm-bar-arrow"
+                style="left: {{ [92, 62, 37, 8][r.passung_rank] if r.passung_rank < 4 else 50 }}%;"
+              >
+                ▲
+              </div>
+            </div>
+            <div class="fm-bar-labels">
+              <span>Gering</span><span>Mittel</span><span>Hoch</span
+              ><span>Sehr&nbsp;hoch</span>
+            </div>
+            {% endif %}
+
+            <div class="fm-facts">
+              <div>
+                <span class="fm-fact-label">Förderart</span>
+                {{ r.funding_type or 'k. A.' }}
+              </div>
+              <div>
+                <span class="fm-fact-label">Fördergebiet</span>
+                {{ r.regions or 'k. A.' }}
+              </div>
+              <div>
+                <span class="fm-fact-label">Frist</span>
+                {{ r.deadline or 'k. A.' }}
+              </div>
+              <div>
+                <span class="fm-fact-label">Ähnlichkeit</span>
+                {{ r.similarity }}%
+              </div>
+            </div>
+
+            {% if r.description %}
+            <div class="fm-description">
+              <span class="fm-description-label">Beschreibung</span>
+              {{ r.description }}
+            </div>
+            {% endif %}
+
+            {% if r.kommentar %}
+            <div class="fm-comment">
+              <span class="fm-comment-label">🤖 KI-Kommentar</span>
+              {{ r.kommentar }}
+            </div>
+            {% endif %}
+
+            {% if r.url %}
+            <div class="mt-2 text-start">
+              <a
+                href="{{ r.url }}"
+                target="_blank"
+                rel="noopener"
+                class="fm-link"
+                >Zum Förderprogramm &rarr;</a
+              >
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+
+          <div class="text-center mt-4">
+            <a
+              href="{{ url_for('foerder_match') }}"
+              class="btn btn-outline-light rounded-pill"
+              >Neue Analyse starten</a
+            >
+          </div>
+          <p class="text-white-50 small text-center mt-3 mb-0">
+            Hinweis: Anträge in der Regel vor Vorhabensbeginn stellen; Angaben
+            anhand der offiziellen Förderrichtlinien prüfen.
+          </p>
 
           {% else %}
           <div class="text-center mb-5">
@@ -211,6 +435,15 @@ endblock %} {% block head_extra %}
               Kostenlose Ersteinschätzung Ihres Potentials.
             </p>
           </div>
+
+          {% if error %}
+          <div
+            class="alert alert-danger bg-transparent border-danger text-white"
+            role="alert"
+          >
+            {{ error }}
+          </div>
+          {% endif %}
 
           <form action="{{ url_for('foerder_match') }}" method="POST">
             <div class="mb-4">

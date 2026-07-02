@@ -41,6 +41,21 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
+# ── FoerderMatch engine (separate SQLite + Chroma store) ───────────────────
+from foerdermatch.config import settings as fm_settings
+from foerdermatch import database as fm_database
+from foerdermatch.matching_engine import MatchingEngine
+
+fm_engine = None
+try:
+    fm_database.init_db(fm_settings)
+    fm_engine = MatchingEngine(fm_settings)
+except Exception as exc:
+    app.logger.warning("FoerderMatch engine not ready: %s", exc)
+
+
+
+
 # --- 2. LOGIN MANAGER KONFIGURATION ---
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -52,6 +67,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
     has_license = db.Column(db.Boolean, default=False) 
+    is_admin = db.Column(db.Boolean, default=False)
 
 # --- NEUES MODELL: FÖRDERMITTEL ANFRAGEN ---
 class FoerderRequest(db.Model):
@@ -121,6 +137,45 @@ def add_customer():
         return redirect(url_for('customer_simulation', customer_id=new_customer.id))
         
     return render_template('add_customer.html')
+from flask import abort, Response
+
+@app.route('/admin-panel')
+@login_required
+def admin_panel():
+    if not current_user.is_admin:
+        abort(403)
+    # Count what's in each database for a quick overview.
+    try:
+        from foerdermatch.ingest import list_indexed_programs
+        n_programs = len(list_indexed_programs(fm_settings))
+    except Exception:
+        n_programs = "?"
+    return render_template('admin_panel.html', n_programs=n_programs)
+
+
+@app.route('/admin-panel/programs.csv')
+@login_required
+def admin_download_programs():
+    if not current_user.is_admin:
+        abort(403)
+    from foerdermatch.ingest import list_indexed_programs
+    import csv, io
+    programs = list_indexed_programs(fm_settings)
+    buf = io.StringIO()
+    buf.write('\ufeff')  # BOM so Excel reads umlauts correctly
+    cols = ["title", "provider", "funding_type", "funding_area",
+            "regions", "eligible_companies", "deadline_text", "url",
+            "last_seen_at", "program_id"]
+    writer = csv.DictWriter(buf, fieldnames=cols, extrasaction="ignore", delimiter=";")
+    writer.writeheader()
+    for p in programs:
+        writer.writerow(p)
+    return Response(
+        buf.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=foerderprogramme.csv"},
+    )
+
 
 @app.route('/customer/<int:customer_id>', methods=['GET', 'POST'])
 @login_required
@@ -207,29 +262,44 @@ def logout():
 
 @app.route('/products/foerder-match', methods=['GET', 'POST'])
 def foerder_match():
-    success = False
-    
-    if request.method == 'POST':
-        # Daten aus dem Formular holen
-        company = request.form.get('company_name')
-        industry = request.form.get('industry')
-        desc = request.form.get('description')
-        email = request.form.get('email')
-        
-        # In Datenbank speichern
-        new_req = FoerderRequest(
-            company_name=company,
-            industry=industry,
-            description=desc,
-            contact_email=email,
-            user_id=current_user.id if current_user.is_authenticated else None
-        )
-        db.session.add(new_req)
-        db.session.commit()
-        
-        success = True # Damit wir im HTML "Danke!" anzeigen können
+    if request.method == 'GET':
+        return render_template('foerder_match.html', active_page='foerder_match')
 
-    return render_template('foerder_match.html', active_page='foerder_match', success=success)
+    company = request.form.get('company_name', '').strip()
+    industry = request.form.get('industry', '').strip()
+    desc = request.form.get('description', '').strip()
+    email = request.form.get('email', '').strip()
+
+    # Keep the existing lead-capture behaviour (site DB, separate from FoerderMatch).
+    new_req = FoerderRequest(
+        company_name=company, industry=industry, description=desc,
+        contact_email=email,
+        user_id=current_user.id if current_user.is_authenticated else None,
+    )
+    db.session.add(new_req)
+    db.session.commit()
+
+    if not company or not desc:
+        return render_template('foerder_match.html', active_page='foerder_match',
+                               error="Bitte Unternehmensname und Projektbeschreibung angeben.")
+    if fm_engine is None:
+        return render_template('foerder_match.html', active_page='foerder_match',
+                               error="Der Förder-Index ist noch nicht aufgebaut.")
+
+    try:
+        client_id = fm_database.add_client(
+            fm_settings, company_name=company, industry=industry,
+            state='bundesweit', project_description=desc, company_size='',
+        )
+        results = fm_engine.match_structured(client_id, k=fm_settings.top_k)
+    except Exception as exc:
+        app.logger.exception("FoerderMatch failed")
+        return render_template('foerder_match.html', active_page='foerder_match',
+                               error=f"Beim Matching ist ein Fehler aufgetreten: {exc}")
+
+    return render_template('foerder_match.html', active_page='foerder_match',
+                           results=results, client_name=company,
+                           project_description=desc)
 
 @app.route('/presentation')
 def presentation():
