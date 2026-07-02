@@ -1,0 +1,125 @@
+{
+  "_note": "Beispieldaten für Entwicklungs- und Testzwecke. Die Einträge sind realen Programmen der Förderdatenbank des Bundes (foerderdatenbank.de) nachempfunden (Stand der Modellierung: Juni 2026), können aber veraltet oder vereinfacht sein. Vor produktiver Nutzung zwingend gegen die offiziellen Richtlinien prüfen. Das Feldschema entspricht exakt dem Output des Live-Scrapers in ingest.py.",
+  "programs": [
+    {
+      "url": "https://www.foerderdatenbank.de/FDB/Content/DE/Foerderprogramm/Bund/BMWK/energie-ressourceneffizienz-wirtschaft-modul4.html",
+      "title": "Bundesförderung für Energie- und Ressourceneffizienz in der Wirtschaft (EEW) – Modul 4: Energie- und ressourcenbezogene Optimierung von Anlagen und Prozessen",
+      "provider": "Bundesministerium für Wirtschaft und Energie (BMWE) / Bundesamt für Wirtschaft und Ausfuhrkontrolle (BAFA)",
+      "funding_type": "Zuschuss",
+      "funding_area": "Energieeffizienz & Erneuerbare Energien; Umwelt- & Naturschutz",
+      "regions": "bundesweit",
+      "eligible_applicants": "Unternehmen",
+      "objective": "Gefördert werden Investitionen von Unternehmen in die energie- und ressourcenbezogene Optimierung von Anlagen und Prozessen, um Energieeinsparungen zu erzielen und CO2-Emissionen in der Produktion zu senken.",
+      "description": "Unternehmen erhalten einen Investitionszuschuss für Maßnahmen, die den Energieverbrauch und die Treibhausgasemissionen industrieller und gewerblicher Prozesse deutlich reduzieren. Förderfähig sind unter anderem die Anschaffung energieeffizienter Produktionsmaschinen und -anlagen, die Nutzung von Abwärme (z. B. aus Druckluftanlagen), die Elektrifizierung von Prozessen, Mess-, Steuer- und Regelungstechnik sowie die Umstellung auf erneuerbare Prozesswärme. Die Förderhöhe richtet sich nach der eingesparten Menge an CO2 bzw. Endenergie und der Unternehmensgröße; kleine und mittlere Unternehmen (KMU) erhalten erhöhte Fördersätze. Voraussetzung ist ein Einsparkonzept, das die erwartete Reduktion nachvollziehbar darlegt. Der Antrag ist vor Vorhabensbeginn beim BAFA zu stellen; alternativ ist eine Kreditvariante mit Tilgungszuschuss über die KfW möglich.",
+      "deadline_text": "Anträge können laufend gestellt werden."
+    },
+    {
+      "url": "https://www.foerderdatenbank.de/FDB/Content/DE/Foerderprogramm/Bund/BMWi/fue-kooperationsprojekte-zim.html",
+      "title": "Zentrales Innovationsprogramm Mittelstand (ZIM) – FuE-Kooperationsprojekte",
+      "provider": "Bundesministerium für Wirtschaft und Energie (BMWE)",
+      "funding_type": "Zuschuss",
+      "funding_area": "Forschung & Innovation (themenoffen)",
+      "regions": "bundesweit",
+      "eligible_applicants": "Unternehmen, Forschungseinrichtungen (in Kooperation mit KMU)",
+      "objective": "Das ZIM stärkt die Innovationskraft mittelständischer Unternehmen durch Zuschüsse für marktorientierte Forschungs- und Entwicklungsprojekte (FuE), die zu neuen Produkten, Verfahren oder technischen Dienstleistungen führen.",
+      "description": "Kleine und mittlere Unternehmen (KMU) sowie kooperierende Forschungseinrichtungen erhalten finanzielle Unterstützung für anspruchsvolle FuE-Projekte mit technischem Risiko und hohem Innovationsniveau. Die Förderung erfolgt themen- und branchenoffen. Für nationale Kooperationsprojekte beträgt der Zuschuss bis zu 55 Prozent der förderfähigen Kosten (max. 560.000 Euro pro Teilprojekt); bei internationalen Kooperationen erhöht sich der Fördersatz. Gefördert werden Personal- und Sachkosten der Entwicklung innovativer Software, Hardware, Verfahren und technischer Dienstleistungen sowie ergänzende Leistungen zur Markteinführung. Der Antrag wird digital über die Förderzentrale Deutschland eingereicht und ist vor Vorhabensbeginn zu stellen.",
+      "deadline_text": "Sie können Ihren Antrag laufend stellen."
+    },
+    {
+      "url": "https://www.foerderdatenbank.de/FDB/Content/DE/Foerderprogramm/Bund/BMWK/beg-nichtwohngebaeude.html",
+      "title": "Bundesförderung für effiziente Gebäude (BEG) – Nichtwohngebäude",
+      "provider": "Bundesministerium für Wirtschaft und Energie (BMWE) / KfW und BAFA",
+      "funding_type": "Kredit mit Tilgungszuschuss, Zuschuss",
+      "funding_area": "Energieeffizienz & Erneuerbare Energien; Bauen & Wohnen",
+      "regions": "bundesweit",
+      "eligible_applicants": "Unternehmen, Kommunen, gemeinnützige Organisationen, Privatpersonen",
+      "objective": "Gefördert werden die energetische Sanierung und der effiziente Neubau von Nichtwohngebäuden, etwa Produktions- und Bürogebäuden, zur Senkung des Energiebedarfs im Gebäudebestand.",
+      "description": "Eigentümerinnen und Eigentümer von Nichtwohngebäuden erhalten zinsgünstige Kredite mit Tilgungszuschuss oder direkte Zuschüsse für Komplettsanierungen auf Effizienzgebäude-Niveau sowie für Einzelmaßnahmen an der Gebäudehülle, Anlagentechnik, Lüftung und Heizungstechnik (z. B. Wärmepumpen, Anschluss an Wärmenetze). Die Einbindung einer Energieeffizienz-Expertin oder eines -Experten ist in der Regel verpflichtend. Die Förderhöhe hängt vom erreichten Effizienzstandard ab; Nachhaltigkeitszertifizierungen werden zusätzlich honoriert. Anträge sind vor Vorhabensbeginn bei der KfW (systemische Maßnahmen) bzw. beim BAFA (Einzelmaßnahmen) zu stellen.",
+      "deadline_text": "Anträge können laufend gestellt werden."
+    },
+    {
+      "url": "https://www.foerderdatenbank.de/FDB/Content/DE/Foerderprogramm/Bund/BMF/forschungszulage.html",
+      "title": "Forschungszulage – steuerliche Förderung von Forschung und Entwicklung",
+      "provider": "Bundesministerium der Finanzen (BMF) / Bescheinigungsstelle Forschungszulage (BSFZ)",
+      "funding_type": "Steuerliche Förderung (Zulage)",
+      "funding_area": "Forschung & Innovation",
+      "regions": "bundesweit",
+      "eligible_applicants": "Unternehmen (alle Größen, steuerpflichtig in Deutschland)",
+      "objective": "Die Forschungszulage fördert eigenbetriebliche Forschung und Entwicklung sowie Auftragsforschung steuerlich, unabhängig von Branche und Unternehmensgröße.",
+      "description": "Steuerpflichtige Unternehmen erhalten eine Zulage auf förderfähige Aufwendungen für Grundlagenforschung, industrielle Forschung und experimentelle Entwicklung. Begünstigt sind insbesondere Personalkosten für FuE-Tätigkeiten sowie Anteile der Kosten von Auftragsforschung; für kleine und mittlere Unternehmen gelten erhöhte Fördersätze. Das Verfahren ist zweistufig: Zunächst bescheinigt die Bescheinigungsstelle Forschungszulage (BSFZ) den FuE-Charakter des Vorhabens, anschließend wird die Zulage beim zuständigen Finanzamt festgesetzt und mit der Steuerschuld verrechnet bzw. ausgezahlt. Die Forschungszulage ist mit anderen Förderprogrammen kombinierbar, sofern dieselben Kosten nicht doppelt gefördert werden.",
+      "deadline_text": "Die Beantragung ist laufend möglich, auch rückwirkend für bereits begonnene Vorhaben."
+    },
+    {
+      "url": "https://www.foerderdatenbank.de/FDB/Content/DE/Foerderprogramm/Bund/BMBF/kmu-innovativ-klimaschutz.html",
+      "title": "KMU-innovativ: Klimaschutz, Klimaanpassung, Ressourceneffizienz und Kreislaufwirtschaft",
+      "provider": "Bundesministerium für Forschung, Technologie und Raumfahrt (BMFTR)",
+      "funding_type": "Zuschuss",
+      "funding_area": "Forschung & Innovation; Umwelt- & Naturschutz",
+      "regions": "bundesweit",
+      "eligible_applicants": "Unternehmen (KMU), Forschungseinrichtungen und Hochschulen im Verbund",
+      "objective": "Gefördert werden risikoreiche industrielle Forschungs- und vorwettbewerbliche Entwicklungsvorhaben von KMU zu Klimaschutz, Klimaanpassung, Ressourceneffizienz und Kreislaufwirtschaft.",
+      "description": "Kleine und mittlere Unternehmen erhalten Zuschüsse für Spitzenforschung in Einzel- oder Verbundprojekten, etwa zu energie- und ressourceneffizienten Produktionstechnologien, klimafreundlichen Verfahren, Recycling und nachhaltigem Wassermanagement. Forschungseinrichtungen und Hochschulen können als Verbundpartner gefördert werden. Die Fördersätze richten sich nach Unternehmensgröße und Forschungskategorie; ein vereinfachtes zweistufiges Verfahren (Projektskizze, dann Vollantrag) senkt die Einstiegshürde für förderunerfahrene Unternehmen. Projektskizzen werden zu festen Stichtagen bewertet.",
+      "deadline_text": "Projektskizzen können jeweils zum 15. April und 15. Oktober eines Jahres eingereicht werden."
+    },
+    {
+      "url": "https://www.foerderdatenbank.de/FDB/Content/DE/Foerderprogramm/Bund/BMWK/go-inno.html",
+      "title": "BMWE-Innovationsgutscheine (go-inno)",
+      "provider": "Bundesministerium für Wirtschaft und Energie (BMWE)",
+      "funding_type": "Zuschuss (Gutschein)",
+      "funding_area": "Beratung; Forschung & Innovation",
+      "regions": "bundesweit",
+      "eligible_applicants": "Unternehmen (KMU mit weniger als 100 Beschäftigten)",
+      "objective": "go-inno fördert externe Beratungsleistungen zur Vorbereitung und Umsetzung von Produkt- und technischen Verfahrensinnovationen in kleinen Unternehmen.",
+      "description": "Kleine Unternehmen mit weniger als 100 Beschäftigten erhalten Innovationsgutscheine, mit denen 50 Prozent der Ausgaben für qualifizierte externe Innovationsberatung gedeckt werden. Autorisierte Beratungsunternehmen begleiten von der Potenzialanalyse über das Realisierungskonzept bis zum Projektmanagement der Umsetzung. Der Eigenanteil des Unternehmens beträgt 50 Prozent; die Abrechnung erfolgt direkt über das Beratungsunternehmen, wodurch der administrative Aufwand für das KMU gering bleibt.",
+      "deadline_text": "Gutscheine können laufend bei autorisierten Beratungsunternehmen eingelöst werden."
+    },
+    {
+      "url": "https://www.foerderdatenbank.de/FDB/Content/DE/Foerderprogramm/Bund/BMUV/umweltinnovationsprogramm.html",
+      "title": "Umweltinnovationsprogramm (UIP)",
+      "provider": "Bundesministerium für Umwelt, Klimaschutz, Naturschutz und nukleare Sicherheit (BMUKN) / KfW",
+      "funding_type": "Zuschuss, Zinszuschuss",
+      "funding_area": "Umwelt- & Naturschutz; Energieeffizienz",
+      "regions": "bundesweit",
+      "eligible_applicants": "Unternehmen, Kommunen, kommunale Betriebe",
+      "objective": "Das UIP fördert großtechnische Pilotprojekte, die erstmalig demonstrieren, wie fortschrittliche Verfahren und Anlagen Umweltbelastungen vermeiden oder deutlich verringern.",
+      "description": "Gefördert wird die erstmalige großtechnische Anwendung innovativer Verfahren mit deutlicher Umweltentlastung, beispielsweise in den Bereichen Energieeffizienz in der Produktion, Abwärmenutzung, Ressourcenschonung, Kreislaufwirtschaft, Wasser- und Abwassertechnik oder Luftreinhaltung. Das Vorhaben muss über den Stand der Technik hinausgehen und Demonstrationscharakter für die jeweilige Branche haben. Die Förderung erfolgt als Investitionszuschuss (in der Regel bis zu 30 Prozent der förderfähigen Kosten) oder als Zinszuschuss zu einem KfW-Darlehen. Projektskizzen können jederzeit beim Projektträger eingereicht werden; der Antrag ist vor Vorhabensbeginn zu stellen.",
+      "deadline_text": "Projektskizzen können laufend eingereicht werden."
+    },
+    {
+      "url": "https://www.foerderdatenbank.de/FDB/Content/DE/Foerderprogramm/Land/NRW/progres-nrw-klimaschutztechnik.html",
+      "title": "progres.nrw – Klimaschutztechnik",
+      "provider": "Land Nordrhein-Westfalen, Ministerium für Wirtschaft, Industrie, Klimaschutz und Energie / Bezirksregierung Arnsberg",
+      "funding_type": "Zuschuss",
+      "funding_area": "Energieeffizienz & Erneuerbare Energien; Klimaschutz",
+      "regions": "Nordrhein-Westfalen",
+      "eligible_applicants": "Unternehmen, Privatpersonen, Kommunen, Vereine",
+      "objective": "Das Land Nordrhein-Westfalen fördert den Einsatz von Klimaschutztechniken zur Nutzung erneuerbarer Energien und unvermeidbarer Abwärme sowie zur Steigerung der Energieeffizienz.",
+      "description": "Gefördert werden in Nordrhein-Westfalen unter anderem Wärmepumpen, Anlagen zur Nutzung industrieller Abwärme, Wärmespeicher, Batteriespeicher in Verbindung mit Photovoltaik, Wärmenetze sowie Lüftungsanlagen mit Wärmerückgewinnung. Antragsberechtigt sind neben Privatpersonen auch Unternehmen mit Betriebsstätte in NRW sowie Kommunen. Die Zuschüsse werden als Festbeträge oder anteilig zu den Investitionskosten gewährt; die Kombination mit Bundesförderprogrammen ist innerhalb der beihilferechtlichen Grenzen möglich. Anträge sind vor Vorhabensbeginn elektronisch bei der Bezirksregierung Arnsberg zu stellen.",
+      "deadline_text": "Anträge können laufend im Rahmen der verfügbaren Haushaltsmittel gestellt werden."
+    },
+    {
+      "url": "https://www.foerderdatenbank.de/FDB/Content/DE/Foerderprogramm/Land/Bayern/digitalbonus-bayern.html",
+      "title": "Digitalbonus Bayern",
+      "provider": "Bayerisches Staatsministerium für Wirtschaft, Landesentwicklung und Energie",
+      "funding_type": "Zuschuss",
+      "funding_area": "Digitalisierung; IT-Sicherheit",
+      "regions": "Bayern",
+      "eligible_applicants": "Unternehmen (KMU der gewerblichen Wirtschaft mit Betriebsstätte in Bayern)",
+      "objective": "Der Digitalbonus unterstützt kleine und mittlere Unternehmen in Bayern bei der digitalen Transformation von Produkten, Prozessen und Dienstleistungen sowie bei der Verbesserung der IT-Sicherheit.",
+      "description": "Kleine und mittlere Unternehmen der gewerblichen Wirtschaft mit Betriebsstätte in Bayern erhalten Zuschüsse für die Entwicklung, Einführung oder Verbesserung digitaler Produkte, Prozesse und Dienstleistungen, etwa Software zur Prozessautomatisierung, digitale Fertigungstechnologien oder Maßnahmen zur IT-Sicherheit. Der Digitalbonus Standard fördert anteilig bis zu einem festen Höchstbetrag; der Digitalbonus Plus unterstützt Vorhaben mit besonderem Innovationsgehalt mit höheren Beträgen. Der Antrag ist vor Vorhabensbeginn online bei der zuständigen Bezirksregierung zu stellen.",
+      "deadline_text": "Anträge können bis zum 31.12.2026 gestellt werden."
+    },
+    {
+      "url": "https://www.foerderdatenbank.de/FDB/Content/DE/Foerderprogramm/Bund/BMWK/serielle-sanierung.html",
+      "title": "Bundesförderung Serielle Sanierung (ausgelaufen)",
+      "provider": "Bundesministerium für Wirtschaft und Energie (BMWE)",
+      "funding_type": "Zuschuss",
+      "funding_area": "Energieeffizienz & Erneuerbare Energien; Bauen & Wohnen",
+      "regions": "bundesweit",
+      "eligible_applicants": "Unternehmen, Wohnungswirtschaft, Kontraktoren",
+      "objective": "Die Bundesförderung Serielle Sanierung unterstützte die Entwicklung und Pilotierung vorgefertigter Fassaden- und Dachelemente sowie standardisierter Anlagentechnik für die serielle energetische Sanierung von Gebäuden.",
+      "description": "Gefördert wurden Machbarkeitsstudien, die Entwicklung serieller Sanierungskomponenten und deren pilothafte Umsetzung an Bestandsgebäuden, um Sanierungskosten zu senken und Sanierungsraten zu erhöhen. Dieses Beispielprogramm ist im Datensatz enthalten, um den Fristen-Filter der Matching-Engine zu demonstrieren: Die Antragsfrist ist abgelaufen, daher darf das Programm in keinem aktuellen Matching-Ergebnis auftauchen.",
+      "deadline_text": "Anträge konnten bis zum 31.12.2025 gestellt werden."
+    }
+  ]
+}
